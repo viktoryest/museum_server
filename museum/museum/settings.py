@@ -37,7 +37,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'museum_srv.apps.MuseumSrvConfig'
+    'museum_srv.apps.MuseumSrvConfig',
+    'rest_framework',
 ]
 
 MIDDLEWARE = [
