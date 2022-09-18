@@ -15,9 +15,11 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from museum_srv.views import VideoStandAPIView
+from museum_srv.views import VideoStandPageAPIView, VideoStandEmployeeAPIView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/video_stand/', VideoStandAPIView.as_view()),
+    path('api/video_stand/', VideoStandPageAPIView.as_view()),
+    path('api/video_stand/page/', VideoStandPageAPIView.as_view()),
+    path('api/video_stand/employee/<group>/', VideoStandEmployeeAPIView.as_view()),
 ]
