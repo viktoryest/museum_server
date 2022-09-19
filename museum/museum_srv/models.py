@@ -1,4 +1,5 @@
 from django.db import models
+from model_utils import Choices
 
 
 class VideoStandPage(models.Model):
@@ -9,7 +10,7 @@ class VideoStandPage(models.Model):
 
 
 class VideoStandEmployee(models.Model):
-    group = models.CharField(max_length=50)
+    group = models.CharField(max_length=50, choices=Choices('fame', 'veterans'))
     fio = models.CharField(max_length=100)
     job = models.CharField(max_length=100)
     description = models.TextField()

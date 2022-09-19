@@ -15,13 +15,6 @@ class VideoStandPageAPIView(APIView):
 
 class VideoStandEmployeeAPIView(APIView):
     def get(self, request, group):
-        employee_list = None
-        if group == "fame":
-            employee_list = \
-                VideoStandEmployee.objects.filter(group="fame").values("id", "fio", "job", "description", "photo")
-        elif group == "veterans":
-            employee_list = \
-                VideoStandEmployee.objects.filter(group="veterans").values("id", "fio", "job", "description", "photo")
-        # else:
-        #     raise ValueError('The group is not found')
+        employee_list = \
+            VideoStandEmployee.objects.filter(group=group).values("id", "fio", "job", "description", "photo")
         return Response({"employees": employee_list})
