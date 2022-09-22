@@ -19,3 +19,12 @@ class VideoStandEmployee(models.Model):
 
     def __str__(self):
         return self.fio
+
+
+class TimeLine(models.Model):
+    year = models.CharField(max_length=4)
+    video_1 = models.FileField(upload_to='static/timeline/video')
+    video_2 = models.FileField(upload_to='static/timeline/video')
+
+    def __str__(self):
+        return self.year
