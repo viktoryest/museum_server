@@ -36,3 +36,16 @@ class AreaSamara(models.Model):
 
     def __str__(self):
         return self.pipeline
+
+
+class Technologies(models.Model):
+    stage = models.CharField(max_length=100)
+    backstage_video = models.FileField(upload_to='static/technologies/video')
+
+    def __str__(self):
+        return self.stage
+
+
+class TechnologiesMoving(models.Model):
+    moving_video = models.FileField(upload_to='static/technologies/video')
+    label = models.CharField(max_length=100)

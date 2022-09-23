@@ -1,10 +1,12 @@
 from django.contrib import admin
-from .models import VideoStandEmployee, TimeLine, AreaSamara
+from .models import VideoStandEmployee, TimeLine, AreaSamara, Technologies, TechnologiesMoving
 
 admin.site.disable_action('delete_selected')
 admin.site.register(VideoStandEmployee)
 admin.site.register(TimeLine)
 admin.site.register(AreaSamara)
+admin.site.register(Technologies)
+admin.site.register(TechnologiesMoving)
 
 
 # @admin.register(VideoStandEmployee)

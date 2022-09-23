@@ -16,7 +16,8 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from museum_srv.views import VideoStandPageAPIView, VideoStandEmployeeAPIView, TimeLineAPIView, TimeLineVideoAPIView, \
-    AreaSamaraAPIView, AreaSamaraVideoAPIView
+    AreaSamaraAPIView, AreaSamaraVideoAPIView, TechnologiesAPIView, TechnologiesVideoAPIView, \
+    TechnologiesMovingVideoAPIView, TechnologiesVideoLabelAPIView
 from django.conf import settings
 from django.conf.urls.static import static
 
@@ -29,6 +30,10 @@ urlpatterns = [
     path('api/timeline/<int:year>/<int:video>/', TimeLineVideoAPIView.as_view()),
     path('api/area_samara/pipeline/', AreaSamaraAPIView.as_view()),
     path('api/area_samara/video/', AreaSamaraVideoAPIView.as_view()),
+    path('api/technologies/stage/', TechnologiesAPIView.as_view()),
+    path('api/technologies/video/', TechnologiesVideoAPIView.as_view()),
+    path('api/technologies/moving_video_label/', TechnologiesVideoLabelAPIView.as_view()),
+    path('api/technologies/moving_video/<label>/', TechnologiesMovingVideoAPIView.as_view()),
 ]
 
 urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
