@@ -15,8 +15,8 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from museum_srv.views import VideoStandPageAPIView, VideoStandEmployeeAPIView, VideoStandEmployeePhotoAPIView,\
-    TimeLineAPIView
+from museum_srv.views import VideoStandPageAPIView, VideoStandEmployeeAPIView, TimeLineAPIView, TimeLineVideoAPIView, \
+    AreaSamaraAPIView, AreaSamaraVideoAPIView
 from django.conf import settings
 from django.conf.urls.static import static
 
@@ -24,9 +24,11 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/video_stand/', VideoStandPageAPIView.as_view()),
     path('api/video_stand/page/', VideoStandPageAPIView.as_view()),
-    path('api/video_stand/employee_photo/<fio>/', VideoStandEmployeePhotoAPIView.as_view()),
     path('api/video_stand/employee/<group>/', VideoStandEmployeeAPIView.as_view()),
     path('api/timeline/year/', TimeLineAPIView.as_view()),
+    path('api/timeline/<int:year>/<int:video>/', TimeLineVideoAPIView.as_view()),
+    path('api/area_samara/pipeline/', AreaSamaraAPIView.as_view()),
+    path('api/area_samara/video/', AreaSamaraVideoAPIView.as_view()),
 ]
 
 urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

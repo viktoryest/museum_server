@@ -28,3 +28,11 @@ class TimeLine(models.Model):
 
     def __str__(self):
         return self.year
+
+
+class AreaSamara(models.Model):
+    pipeline = models.CharField(max_length=100)
+    video = models.FileField(upload_to='static/area_samara/video')
+
+    def __str__(self):
+        return self.pipeline

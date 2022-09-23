@@ -1,6 +1,7 @@
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from .models import VideoStandPage, VideoStandEmployee, TimeLine
+from .models import VideoStandPage, VideoStandEmployee, TimeLine, AreaSamara
+from django.shortcuts import redirect
 
 
 class VideoStandPageAPIView(APIView):
@@ -20,12 +21,6 @@ class VideoStandEmployeeAPIView(APIView):
         return Response({"employees": employee_list})
 
 
-class VideoStandEmployeePhotoAPIView(APIView):
-    def get(self, request, fio):
-        employee_photo = VideoStandEmployee.objects.filter(fio=fio).values("photo")
-        return Response(employee_photo)
-
-
 class TimeLineAPIView(APIView):
     def get(self, request):
         year = TimeLine.objects.first()
@@ -35,3 +30,30 @@ class TimeLineAPIView(APIView):
         TimeLine.objects.update(year=request.data['year'])
         return Response()
 
+
+class TimeLineVideoAPIView(APIView):
+    def get(self, request, year, video):
+        video_index = video
+        video = TimeLine.objects.filter(year=year).values(f'video_{video_index}')
+        video_path = video.first()[f'video_{video_index}']
+        response = redirect(f'/media/{video_path}')
+        return response
+
+
+class AreaSamaraAPIView(APIView):
+    def get(self, request):
+        pipeline = AreaSamara.objects.first()
+        return Response({"pipeline": f"{pipeline}"})
+
+    def post(self, request):
+        AreaSamara.objects.update(pipeline=request.data['pipeline'])
+        return Response()
+
+
+class AreaSamaraVideoAPIView(APIView):
+    def get(self, request):
+        video = AreaSamara.objects.filter(pk=1).values('video')
+        video_path = video.first()['video']
+        print(video_path)
+        response = redirect(f'/media/{video_path}')
+        return response
