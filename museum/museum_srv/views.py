@@ -1,6 +1,6 @@
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from .models import VideoStandPage, VideoStandEmployee, TimeLine, AreaSamara, Technologies, TechnologiesMoving
+from .models import VideoStandPage, VideoStandEmployee, TimeLine, AreaSamara, Technologies, TechnologiesMoving, FlowMask
 from django.shortcuts import redirect
 
 
@@ -94,3 +94,21 @@ class TechnologiesMovingVideoAPIView(APIView):
         moving_video_path = moving_video.first()['moving_video']
         final_path = f'/media/{moving_video_path}'
         return final_path
+
+
+class FlowMaskAPIView(APIView):
+    def get(self, request):
+        mask = bin(int(str(FlowMask.objects.first())))
+        return Response({"mask": f"{mask}"})
+
+    def post(self, request, flow, condition):
+        mask = int(str(FlowMask.objects.first()), base=2)
+        print(mask, type(mask))
+        position = int(flow) - 1
+        if condition == 'on':
+            new_mask = mask | (1 << position)
+            FlowMask.objects.update(mask=new_mask)
+        elif condition == 'off':
+            new_mask = mask & ~(1 << position)
+            FlowMask.objects.update(mask=new_mask)
+        return Response()

@@ -49,3 +49,10 @@ class Technologies(models.Model):
 class TechnologiesMoving(models.Model):
     moving_video = models.FileField(upload_to='static/technologies/video')
     label = models.CharField(max_length=100)
+
+
+class FlowMask(models.Model):
+    mask = models.CharField(max_length=9)
+
+    def __str__(self):
+        return self.mask

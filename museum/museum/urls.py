@@ -17,7 +17,7 @@ from django.contrib import admin
 from django.urls import path
 from museum_srv.views import VideoStandPageAPIView, VideoStandEmployeeAPIView, TimeLineAPIView, TimeLineVideoAPIView, \
     AreaSamaraAPIView, AreaSamaraVideoAPIView, TechnologiesAPIView, TechnologiesVideoAPIView, \
-    TechnologiesMovingVideoAPIView, TechnologiesVideoLabelAPIView
+    TechnologiesMovingVideoAPIView, TechnologiesVideoLabelAPIView, FlowMaskAPIView
 from django.conf import settings
 from django.conf.urls.static import static
 
@@ -34,6 +34,8 @@ urlpatterns = [
     path('api/technologies/video/', TechnologiesVideoAPIView.as_view()),
     path('api/technologies/moving_video_label/', TechnologiesVideoLabelAPIView.as_view()),
     path('api/technologies/moving_video/<label>/', TechnologiesMovingVideoAPIView.as_view()),
+    path('api/flows/condition/', FlowMaskAPIView.as_view()),
+    path('api/flows/<int:flow>/<condition>/', FlowMaskAPIView.as_view()),
 ]
 
 urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
