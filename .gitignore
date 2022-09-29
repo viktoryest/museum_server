@@ -133,3 +133,6 @@ dmypy.json
 
 #Static files
 museum/media/
+
+#Django cache files
+museum/museum_cache/
