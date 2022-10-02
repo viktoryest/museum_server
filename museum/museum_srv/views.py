@@ -51,6 +51,7 @@ class TimeLineAPIView(APIView):
 
 class TimeLineVideoAPIView(APIView):
     video_key = 'timeline_video'
+    video_duration_key = 'timeline_video_duration'
 
     def get(self, request, year, video):
         video_index = video
@@ -60,7 +61,14 @@ class TimeLineVideoAPIView(APIView):
             video_path = video.first()[f'video_{video_index}']
             final_path = f'/media/{video_path}'
             cache.set(self.video_key, final_path)
-        return current_video
+
+        video_duration = cache.get(self.video_duration_key)
+        if not video_duration:
+            duration = TimeLine.objects.filter(year=year).values(f'video_{video_index}_duration')
+            cache.set(self.video_duration_key, duration)
+
+        return Response({"current_video": f"{current_video}",
+                         "video_duration": f"{video_duration}"})
 
 
 class AreaSamaraAPIView(APIView):
@@ -82,6 +90,7 @@ class AreaSamaraAPIView(APIView):
 
 class AreaSamaraVideoAPIView(APIView):
     video_key = 'area_samara_video'
+    video_duration_key = 'area_samara_video_duration'
 
     def get(self, request):
         current_video = cache.get(self.video_key)
@@ -90,7 +99,14 @@ class AreaSamaraVideoAPIView(APIView):
             video_path = video.first()['video']
             final_path = f'/media/{video_path}'
             cache.set(self.video_key, final_path)
-        return current_video
+
+        video_duration = cache.get(self.video_duration_key)
+        if not video_duration:
+            duration = AreaSamara.objects.filter(pk=1).values('video_duration')
+            cache.set(self.video_duration_key, duration)
+
+        return Response({"current_video": f"{current_video}",
+                         "video_duration": f"{video_duration}"})
 
 
 class TechnologiesAPIView(APIView):
@@ -112,6 +128,7 @@ class TechnologiesAPIView(APIView):
 
 class TechnologiesVideoAPIView(APIView):
     video_key = 'technologies_video'
+    video_duration_key = 'technologies_video_duration'
 
     def get(self, request):
         current_video = cache.get(self.video_key)
@@ -120,7 +137,14 @@ class TechnologiesVideoAPIView(APIView):
             backstage_video_path = backstage_video.first()['backstage_video']
             final_path = f'/media/{backstage_video_path}'
             cache.set(self.video_key, final_path)
-        return current_video
+
+        video_duration = cache.get(self.video_duration_key)
+        if not video_duration:
+            duration = Technologies.objects.filter(pk=1).values('backstage_video_duration')
+            cache.set(self.video_duration_key, duration)
+
+        return Response({"current_video": f"{current_video}",
+                         "video_duration": f"{video_duration}"})
 
 
 class TechnologiesVideoLabelAPIView(APIView):
@@ -141,6 +165,7 @@ class TechnologiesVideoLabelAPIView(APIView):
 
 class TechnologiesMovingVideoAPIView(APIView):
     moving_video_key = 'technologies_moving_video'
+    moving_video_duration_key = 'technologies_moving_video_duration'
 
     def get(self, request, label):
         current_video = cache.get(self.moving_video_key)
@@ -149,7 +174,14 @@ class TechnologiesMovingVideoAPIView(APIView):
             moving_video_path = moving_video.first()['moving_video']
             final_path = f'/media/{moving_video_path}'
             cache.set(self.moving_video_key, final_path)
-        return current_video
+
+        video_duration = cache.get(self.moving_video_duration_key)
+        if not video_duration:
+            duration = TechnologiesMoving.objects.filter(label=label).values('moving_video_duration')
+            cache.set(self.moving_video_duration_key, duration)
+
+        return Response({"current_video": f"{current_video}",
+                         "video_duration": f"{video_duration}"})
 
 
 class FlowMaskAPIView(APIView):
