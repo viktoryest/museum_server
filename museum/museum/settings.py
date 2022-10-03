@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'museum_srv.apps.MuseumSrvConfig',
     'rest_framework',
+    'drf_yasg',
 ]
 
 MIDDLEWARE = [
