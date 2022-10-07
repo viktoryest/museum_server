@@ -71,31 +71,40 @@ class Technologies(models.Model):
     stage = models.CharField(max_length=100)
     backstage_video = models.FileField(upload_to='static/technologies/video')
     backstage_video_duration = models.CharField(max_length=100, blank=True)
+    moving_video = models.FileField(upload_to='static/technologies/video')
+    moving_video_duration = models.CharField(max_length=100, blank=True)
 
     def save(self, *args, **kwargs):
         super(Technologies, self).save(*args, **kwargs)
+
         backstage_video = self.backstage_video
-        final_path = f'media/{backstage_video}'
-        clip = VideoFileClip(os.path.join(BASE_DIR, final_path))
-        video_duration = clip.duration
-        Technologies.objects.update(backstage_video_duration=video_duration)
+        back_final_path = f'media/{backstage_video}'
+        back_clip = VideoFileClip(os.path.join(BASE_DIR, back_final_path))
+        back_video_duration = back_clip.duration
+        Technologies.objects.update(backstage_video_duration=back_video_duration)
+
+        moving_video = self.moving_video
+        mov_final_path = f'media/{moving_video}'
+        mov_clip = VideoFileClip(os.path.join(BASE_DIR, mov_final_path))
+        mov_video_duration = mov_clip.duration
+        Technologies.objects.update(moving_video_duration=mov_video_duration)
 
     def __str__(self):
         return self.stage
 
 
-class TechnologiesMoving(models.Model):
-    moving_video = models.FileField(upload_to='static/technologies/video')
+class TechnologiesFourth(models.Model):
     label = models.CharField(max_length=100)
-    moving_video_duration = models.CharField(max_length=100, blank=True)
+    fourth_stage_video = models.FileField(upload_to='static/technologies/video')
+    fourth_stage_video_duration = models.CharField(max_length=100, blank=True)
 
     def save(self, *args, **kwargs):
-        super(TechnologiesMoving, self).save(*args, **kwargs)
-        moving_video = self.moving_video
-        final_path = f'media/{moving_video}'
+        super(TechnologiesFourth, self).save(*args, **kwargs)
+        fourth_stage_video = self.fourth_stage_video
+        final_path = f'media/{fourth_stage_video}'
         clip = VideoFileClip(os.path.join(BASE_DIR, final_path))
         video_duration = clip.duration
-        TechnologiesMoving.objects.update(moving_video_duration=video_duration)
+        TechnologiesFourth.objects.update(fourth_stage_video_duration=video_duration)
 
 
 class FlowMask(models.Model):
