@@ -21,21 +21,30 @@ class VideoStandPageAPIView(APIView):
         return Response()
 
 
+class VideoStandEmployeeListAPIView(APIView):
+    def get(self, request, group):
+        employee_list = \
+            VideoStandEmployee.objects.filter(group=group).values("id", "fio", "job", "description", "photo")
+        return Response({"employees": employee_list})
+
+
 class VideoStandEmployeeAPIView(APIView):
     employee_key = 'video_stand_employee'
 
-    def get(self, request, group):
-        current_employee_list = cache.get(self.employee_key)
-        if not current_employee_list:
-            employee_list = \
-                VideoStandEmployee.objects.filter(group=group).values("id", "fio", "job", "description", "photo")
-            cache.set(self.employee_key, employee_list)
-        return Response({"employees": current_employee_list})
+    def get(self, request):
+        current_employee = cache.get(self.employee_key)
+        if not current_employee:
+            employee = VideoStandEmployee.objects.filter(pk=1).values("current_employee")
+            cache.set(self.employee_key, employee)
+        return Response({"employee": f"{current_employee}"})
+
+    def post(self, request):
+        VideoStandEmployee.objects.update(current_employee=request.data['current_employee'])
+        cache.set(self.employee_key, request.data['current_employee'])
+        return Response()
 
 
 class TimeLineAPIView(APIView):
-    year_key = 'timeline_year'
-
     def get(self, request):
         current_year = cache.get(self.year_key)
         if not current_year:
@@ -50,25 +59,16 @@ class TimeLineAPIView(APIView):
 
 
 class TimeLineVideoAPIView(APIView):
-    video_key = 'timeline_video'
-    video_duration_key = 'timeline_video_duration'
-
     def get(self, request, year, video):
         video_index = video
-        current_video = cache.get(self.video_key)
-        if not current_video:
-            video = TimeLine.objects.filter(year=year).values(f'video_{video_index}')
-            video_path = video.first()[f'video_{video_index}']
-            final_path = f'/media/{video_path}'
-            cache.set(self.video_key, final_path)
+        video = TimeLine.objects.filter(year=year).values(f'video_{video_index}')
+        video_path = video.first()[f'video_{video_index}']
+        final_path = f'/media/{video_path}'
 
-        video_duration = cache.get(self.video_duration_key)
-        if not video_duration:
-            duration = TimeLine.objects.filter(year=year).values(f'video_{video_index}_duration')
-            cache.set(self.video_duration_key, duration)
+        duration = TimeLine.objects.filter(year=year).values(f'video_{video_index}_duration')
 
-        return Response({"current_video": f"{current_video}",
-                         "video_duration": f"{video_duration}"})
+        return Response({"current_video": f"{final_path}",
+                         "video_duration": f"{duration}"})
 
 
 class AreaSamaraAPIView(APIView):
@@ -89,24 +89,15 @@ class AreaSamaraAPIView(APIView):
 
 
 class AreaSamaraVideoAPIView(APIView):
-    video_key = 'area_samara_video'
-    video_duration_key = 'area_samara_video_duration'
-
     def get(self, request):
-        current_video = cache.get(self.video_key)
-        if not current_video:
-            video = AreaSamara.objects.filter(pk=1).values('video')
-            video_path = video.first()['video']
-            final_path = f'/media/{video_path}'
-            cache.set(self.video_key, final_path)
+        video = AreaSamara.objects.filter(pk=1).values('video')
+        video_path = video.first()['video']
+        final_path = f'/media/{video_path}'
 
-        video_duration = cache.get(self.video_duration_key)
-        if not video_duration:
-            duration = AreaSamara.objects.filter(pk=1).values('video_duration')
-            cache.set(self.video_duration_key, duration)
+        duration = AreaSamara.objects.filter(pk=1).values('video_duration')
 
-        return Response({"current_video": f"{current_video}",
-                         "video_duration": f"{video_duration}"})
+        return Response({"current_video": f"{final_path}",
+                         "video_duration": f"{duration}"})
 
 
 class TechnologiesAPIView(APIView):
@@ -127,24 +118,15 @@ class TechnologiesAPIView(APIView):
 
 
 class TechnologiesVideoAPIView(APIView):
-    video_key = 'technologies_video'
-    video_duration_key = 'technologies_video_duration'
-
     def get(self, request):
-        current_video = cache.get(self.video_key)
-        if not current_video:
-            backstage_video = Technologies.objects.filter(pk=1).values('backstage_video')
-            backstage_video_path = backstage_video.first()['backstage_video']
-            final_path = f'/media/{backstage_video_path}'
-            cache.set(self.video_key, final_path)
+        backstage_video = Technologies.objects.filter(pk=1).values('backstage_video')
+        backstage_video_path = backstage_video.first()['backstage_video']
+        final_path = f'/media/{backstage_video_path}'
 
-        video_duration = cache.get(self.video_duration_key)
-        if not video_duration:
-            duration = Technologies.objects.filter(pk=1).values('backstage_video_duration')
-            cache.set(self.video_duration_key, duration)
+        duration = Technologies.objects.filter(pk=1).values('backstage_video_duration')
 
-        return Response({"current_video": f"{current_video}",
-                         "video_duration": f"{video_duration}"})
+        return Response({"current_video": f"{final_path}",
+                         "video_duration": f"{duration}"})
 
 
 class TechnologiesVideoLabelAPIView(APIView):
@@ -159,29 +141,20 @@ class TechnologiesVideoLabelAPIView(APIView):
 
     def post(self, request):
         TechnologiesMoving.objects.update(label=request.data['label'])
-        cache.set(self.label_key,  request.data['label'])
+        cache.set(self.label_key, request.data['label'])
         return Response()
 
 
 class TechnologiesMovingVideoAPIView(APIView):
-    moving_video_key = 'technologies_moving_video'
-    moving_video_duration_key = 'technologies_moving_video_duration'
-
     def get(self, request, label):
-        current_video = cache.get(self.moving_video_key)
-        if not current_video:
-            moving_video = TechnologiesMoving.objects.filter(label=label).values('moving_video')
-            moving_video_path = moving_video.first()['moving_video']
-            final_path = f'/media/{moving_video_path}'
-            cache.set(self.moving_video_key, final_path)
+        moving_video = TechnologiesMoving.objects.filter(label=label).values('moving_video')
+        moving_video_path = moving_video.first()['moving_video']
+        final_path = f'/media/{moving_video_path}'
 
-        video_duration = cache.get(self.moving_video_duration_key)
-        if not video_duration:
-            duration = TechnologiesMoving.objects.filter(label=label).values('moving_video_duration')
-            cache.set(self.moving_video_duration_key, duration)
+        duration = TechnologiesMoving.objects.filter(label=label).values('moving_video_duration')
 
-        return Response({"current_video": f"{current_video}",
-                         "video_duration": f"{video_duration}"})
+        return Response({"current_video": f"{final_path}",
+                         "video_duration": f"{duration}"})
 
 
 class FlowMaskAPIView(APIView):
@@ -194,15 +167,14 @@ class FlowMaskAPIView(APIView):
             cache.set(self.mask_key, mask)
         return Response({"mask": f"{current_mask}"})
 
-    def post(self, request, flow, condition):
+    def post(self, request):
         mask = int(str(FlowMask.objects.first()), base=2)
-        print(mask, type(mask))
-        position = int(flow) - 1
-        if condition == 'on':
+        position = int(request.flow) - 1
+        if request.condition and type(request.condition) == bool:
             new_mask = mask | (1 << position)
             FlowMask.objects.update(mask=new_mask)
             cache.set(self.mask_key, new_mask)
-        elif condition == 'off':
+        elif not request.condition and type(request.condition) == bool:
             new_mask = mask & ~(1 << position)
             FlowMask.objects.update(mask=new_mask)
             cache.set(self.mask_key, new_mask)

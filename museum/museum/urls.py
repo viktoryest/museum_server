@@ -15,9 +15,10 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, re_path
-from museum_srv.views import VideoStandPageAPIView, VideoStandEmployeeAPIView, TimeLineAPIView, TimeLineVideoAPIView, \
+from museum_srv.views import VideoStandPageAPIView, VideoStandEmployeeListAPIView, TimeLineAPIView, \
+    TimeLineVideoAPIView, \
     AreaSamaraAPIView, AreaSamaraVideoAPIView, TechnologiesAPIView, TechnologiesVideoAPIView, \
-    TechnologiesMovingVideoAPIView, TechnologiesVideoLabelAPIView, FlowMaskAPIView
+    TechnologiesMovingVideoAPIView, TechnologiesVideoLabelAPIView, FlowMaskAPIView, VideoStandEmployeeAPIView
 from django.conf import settings
 from django.conf.urls.static import static
 from rest_framework import permissions
@@ -41,7 +42,8 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/video_stand/', VideoStandPageAPIView.as_view()),
     path('api/video_stand/page/', VideoStandPageAPIView.as_view()),
-    path('api/video_stand/employee/<group>/', VideoStandEmployeeAPIView.as_view()),
+    path('api/video_stand/employee/<group>/', VideoStandEmployeeListAPIView.as_view()),
+    path('api/video_stand/employee/', VideoStandEmployeeAPIView.as_view()),
     path('api/timeline/year/', TimeLineAPIView.as_view()),
     path('api/timeline/<int:year>/<int:video>/', TimeLineVideoAPIView.as_view()),
     path('api/area_samara/pipeline/', AreaSamaraAPIView.as_view()),
@@ -51,7 +53,6 @@ urlpatterns = [
     path('api/technologies/moving_video_label/', TechnologiesVideoLabelAPIView.as_view()),
     path('api/technologies/moving_video/<label>/', TechnologiesMovingVideoAPIView.as_view()),
     path('api/flows/condition/', FlowMaskAPIView.as_view()),
-    path('api/flows/<int:flow>/<condition>/', FlowMaskAPIView.as_view()),
     re_path(r'^swagger(?P<format>\.json|\.yaml)$', schema_view.without_ui(cache_timeout=0), name='schema-json'),
     re_path(r'^swagger/$', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
     re_path(r'^redoc/$', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
