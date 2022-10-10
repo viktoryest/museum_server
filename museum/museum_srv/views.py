@@ -19,7 +19,10 @@ class VideoStandPageAPIView(APIView):
         return Response({"page": f"{current_page}"})
 
     def post(self, request):
-        VideoStandPage.objects.update(page=request.data['page'])
+        if VideoStandPage.objects.count() == 0:
+            VideoStandPage.objects.create(page=request.data['page'])
+        elif VideoStandPage.objects.count() == 1:
+            VideoStandPage.objects.update(page=request.data['page'])
         cache.set(self.page_key, request.data['page'])
         return Response()
 
@@ -43,7 +46,10 @@ class VideoStandEmployeeAPIView(APIView):
         return Response({"employee": f"{current_employee}"})
 
     def post(self, request):
-        VideoStandEmployee.objects.update(current_employee=request.data['current_employee'])
+        if VideoStandEmployee.objects.count() == 0:
+            VideoStandEmployee.objects.create(current_employee=request.data['current_employee'])
+        elif VideoStandEmployee.objects.count() == 1:
+            VideoStandEmployee.objects.update(current_employee=request.data['current_employee'])
         cache.set(self.employee_key, request.data['current_employee'])
         return Response()
 
@@ -60,7 +66,10 @@ class TimeLineAPIView(APIView):
         return Response({"year": f"{current_year}"})
 
     def post(self, request):
-        TimeLine.objects.update(year=request.data['year'])
+        if TimeLine.objects.count() == 0:
+            TimeLine.objects.create(year=request.data['year'])
+        elif TimeLine.objects.count() == 1:
+            TimeLine.objects.update(year=request.data['year'])
         cache.set(self.year_key, request.data['year'])
         return Response()
 
@@ -92,7 +101,10 @@ class AreaSamaraAPIView(APIView):
         return Response({"pipeline": f"{current_pipeline}"})
 
     def post(self, request):
-        AreaSamara.objects.update(pipeline=request.data['pipeline'])
+        if AreaSamara.objects.count() == 0:
+            AreaSamara.objects.create(pipeline=request.data['pipeline'])
+        elif AreaSamara.objects.count() == 1:
+            AreaSamara.objects.update(pipeline=request.data['pipeline'])
         cache.set(self.pipeline_key, request.data['pipeline'])
         # requests.get(controller_link)
         return Response()
@@ -122,13 +134,16 @@ class TechnologiesStageAPIView(APIView):
         return Response({"stage": f"{current_stage}"})
 
     def post(self, request):
-        Technologies.objects.update(stage=request.data['stage'])
+        if Technologies.objects.count() == 0:
+            Technologies.objects.create(stage=request.data['stage'])
+        elif Technologies.objects.count() == 1:
+            Technologies.objects.update(stage=request.data['stage'])
         cache.set(self.stage_key, request.data['stage'])
         # request.get(controller_link)
         return Response()
 
 
-class TechnologiesForthAPIView(APIView):
+class TechnologiesFourthAPIView(APIView):
     def get(self, request, label):
         fourth_video = TechnologiesFourth.objects \
             .filter(label=label).values("fourth_stage_video", "fourth_stage_video_duration")
@@ -154,7 +169,10 @@ class TechnologiesVideoLabelAPIView(APIView):
         return Response({"label": f"{current_label}"})
 
     def post(self, request):
-        TechnologiesFourth.objects.update(label=request.data['label'])
+        if TechnologiesFourth.objects.count() == 0:
+            TechnologiesFourth.objects.create(label=request.data['label'])
+        elif TechnologiesFourth.objects.count() == 1:
+            TechnologiesFourth.objects.update(label=request.data['label'])
         cache.set(self.label_key, request.data['label'])
         return Response()
 
@@ -203,10 +221,16 @@ class FlowMaskAPIView(APIView):
         position = int(request.data['flow']) - 1
         if request.data['condition'] and type(request.data['condition']) == bool:
             new_mask = mask | (1 << position)
-            FlowMask.objects.update(mask=new_mask)
+            if FlowMask.objects.count() == 0:
+                FlowMask.objects.create(mask=new_mask)
+            elif FlowMask.objects.count() == 1:
+                FlowMask.objects.update(mask=new_mask)
             cache.set(self.mask_key, bin(new_mask)[2:])
         elif not request.data['condition'] and type(request.data['condition']) == bool:
             new_mask = mask & ~(1 << position)
-            FlowMask.objects.update(mask=new_mask)
+            if FlowMask.objects.count() == 0:
+                FlowMask.objects.create(mask=new_mask)
+            elif FlowMask.objects.count() == 1:
+                FlowMask.objects.update(mask=new_mask)
             cache.set(self.mask_key, bin(new_mask)[2:])
         return Response()
