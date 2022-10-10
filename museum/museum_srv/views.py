@@ -28,7 +28,7 @@ class VideoStandPageAPIView(APIView):
 class VideoStandEmployeeListAPIView(APIView):
     def get(self, request, group):
         employee_list = \
-            VideoStandEmployee.objects.filter(group=group).values("id", "fio", "job", "description", "photo")
+            VideoStandEmployee.objects.filter(group=group).values('id', 'fio', 'job', 'description', 'photo')
         return Response({"employees": employee_list})
 
 
@@ -38,7 +38,7 @@ class VideoStandEmployeeAPIView(APIView):
     def get(self, request):
         current_employee = cache.get(self.employee_key)
         if not current_employee:
-            employee = VideoStandEmployee.objects.filter(pk=1).values("current_employee")
+            employee = VideoStandEmployee.objects.filter(pk=1).values('current_employee')
             cache.set(self.employee_key, employee)
             current_employee = employee
         return Response({"employee": f"{current_employee}"})
@@ -144,7 +144,7 @@ class TechnologiesStageAPIView(APIView):
 class TechnologiesFourthAPIView(APIView):
     def get(self, request, label):
         fourth_video = TechnologiesFourth.objects \
-            .filter(label=label).values("fourth_stage_video", "fourth_stage_video_duration")
+            .filter(label=label).values('fourth_stage_video', 'fourth_stage_video_duration')
         fourth_video_path = fourth_video.first()['fourth_stage_video']
         final_path = f'/media/{fourth_video_path}'
 
@@ -175,29 +175,15 @@ class TechnologiesVideoLabelAPIView(APIView):
         return Response()
 
 
-class TechnologiesMovingAPIView(APIView):
-    def get(self, request, stage):
-        moving_video = Technologies.objects \
-            .filter(stage=stage).values("moving_video", "moving_video_duration")
-        moving_video_path = moving_video.first()['moving_video']
-        final_path = f'/media/{moving_video_path}'
+class TechnologiesMovingAndBackstageAPIView(APIView):
+    def get(self, request, video_type, stage):
+        video = Technologies.objects \
+            .filter(stage=stage).values(f'{video_type}_video', f'{video_type}_video_duration')
+        video_path = video.first()[f'{video_type}_video']
+        final_path = f'/media/{video_path}'
 
         duration = Technologies.objects \
-            .filter(stage=stage).values('moving_video_duration').first()['moving_video_duration']
-
-        return Response({"current_video": f"{final_path}",
-                         "video_duration": f"{duration}"})
-
-
-class TechnologiesBackstageAPIView(APIView):
-    def get(self, request, stage):
-        backstage_video = Technologies.objects \
-            .filter(stage=stage).values("backstage_video", "backstage_video_duration")
-        backstage_video_path = backstage_video.first()['backstage_video']
-        final_path = f'/media/{backstage_video_path}'
-
-        duration = Technologies.objects \
-            .filter(stage=stage).values('backstage_video_duration').first()['backstage_video_duration']
+            .filter(stage=stage).values(f'{video_type}_video_duration').first()[f'{video_type}_video_duration']
 
         return Response({"current_video": f"{final_path}",
                          "video_duration": f"{duration}"})

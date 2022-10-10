@@ -19,7 +19,7 @@ from museum_srv.views import VideoStandPageAPIView, VideoStandEmployeeListAPIVie
     TimeLineVideoAPIView, \
     AreaSamaraAPIView, AreaSamaraVideoAPIView, TechnologiesStageAPIView, \
     TechnologiesVideoLabelAPIView, FlowMaskAPIView, VideoStandEmployeeAPIView, TechnologiesFourthAPIView, \
-    TechnologiesMovingAPIView, TechnologiesBackstageAPIView
+    TechnologiesMovingAndBackstageAPIView
 from django.conf import settings
 from django.conf.urls.static import static
 from rest_framework import permissions
@@ -53,8 +53,7 @@ urlpatterns = [
     path('api/technologies/stage/', TechnologiesStageAPIView.as_view()),
     path('api/technologies/video_label/', TechnologiesVideoLabelAPIView.as_view()),
     path('api/technologies/fourth_video/<label>/', TechnologiesFourthAPIView.as_view()),
-    path('api/technologies/moving_video/<stage>/', TechnologiesMovingAPIView.as_view()),
-    path('api/technologies/backstage_video/<stage>/', TechnologiesBackstageAPIView.as_view()),
+    path('api/technologies/<video_type>/<stage>/', TechnologiesMovingAndBackstageAPIView.as_view()),
     path('api/flows/', FlowMaskAPIView.as_view()),
     re_path(r'^swagger(?P<format>\.json|\.yaml)$', schema_view.without_ui(cache_timeout=0), name='schema-json'),
     re_path(r'^swagger/$', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),

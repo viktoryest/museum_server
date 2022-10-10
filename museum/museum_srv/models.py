@@ -26,7 +26,7 @@ class VideoStandEmployee(models.Model):
 
 
 class TimeLine(models.Model):
-    year = models.CharField(max_length=4)
+    year = models.CharField(max_length=10)
     video_1 = models.FileField(upload_to='static/timeline/video')
     video_2 = models.FileField(upload_to='static/timeline/video')
     video_1_duration = models.CharField(max_length=100, blank=True)
