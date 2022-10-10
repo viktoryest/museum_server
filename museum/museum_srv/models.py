@@ -60,7 +60,7 @@ class TimeLine(models.Model):
 
 
 class AreaSamara(models.Model):
-    pipeline = models.CharField(max_length=100)
+    stage = models.CharField(max_length=100)
     video = models.FileField(upload_to='static/area_samara/video')
     video_duration = models.CharField(max_length=100, blank=True)
 
@@ -73,7 +73,7 @@ class AreaSamara(models.Model):
         AreaSamara.objects.update(video_duration=video_duration)
 
     def __str__(self):
-        return self.pipeline
+        return self.stage
 
 
 class Technologies(models.Model):

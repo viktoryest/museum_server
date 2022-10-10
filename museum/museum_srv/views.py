@@ -109,12 +109,12 @@ class AreaSamaraAPIView(APIView):
 
 
 class AreaSamaraVideoAPIView(APIView):
-    def get(self, request):
-        video = AreaSamara.objects.filter(pk=1).values('video')
+    def get(self, request, stage):
+        video = AreaSamara.objects.filter(stage=stage).values('video')
         video_path = video.first()['video']
         final_path = f'/media/{video_path}'
 
-        duration = AreaSamara.objects.filter(pk=1).values('video_duration').first()['video_duration']
+        duration = AreaSamara.objects.filter(stage=stage).values('video_duration').first()['video_duration']
 
         return Response({"current_video": f"{final_path}",
                          "video_duration": f"{duration}"})
