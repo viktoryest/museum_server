@@ -35,16 +35,25 @@ class TimeLine(models.Model):
     def save(self, *args, **kwargs):
         super(TimeLine, self).save(*args, **kwargs)
         video_1 = self.video_1
-        final_path_1 = f'media/{video_1}'
-        clip_1 = VideoFileClip(os.path.join(BASE_DIR, final_path_1))
-        video_1_duration = clip_1.duration
-        TimeLine.objects.update(video_1_duration=video_1_duration)
+        if video_1:
+            final_path_1 = f'media/{video_1}'
+            clip_1 = VideoFileClip(os.path.join(BASE_DIR, final_path_1))
+            video_1_duration = clip_1.duration
+            TimeLine.objects.update(video_1_duration=video_1_duration)
 
         video_2 = self.video_2
-        final_path_2 = f'media/{video_2}'
-        clip_2 = VideoFileClip(os.path.join(BASE_DIR, final_path_2))
-        video_2_duration = clip_2.duration
-        TimeLine.objects.update(video_2_duration=video_2_duration)
+        if video_2:
+            final_path_2 = f'media/{video_2}'
+            clip_2 = VideoFileClip(os.path.join(BASE_DIR, final_path_2))
+            video_2_duration = clip_2.duration
+            TimeLine.objects.update(video_2_duration=video_2_duration)
+
+    @classmethod
+    def check_timeline_videos(cls):
+        list_of_years = ['1936', '1953', '1961', '1970', '1980s', '1990s', '2000s', '2010s']
+        for year in list_of_years:
+            if not cls.objects.filter(year=year):
+                cls.objects.create(year=year)
 
     def __str__(self):
         return self.year

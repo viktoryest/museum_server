@@ -2,8 +2,6 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from .models import VideoStandPage, VideoStandEmployee, TimeLine, AreaSamara, Technologies, FlowMask, TechnologiesFourth
 from django.core.cache import cache
-
-
 # import requests - for sending a request to the controller
 
 
@@ -219,18 +217,14 @@ class FlowMaskAPIView(APIView):
     def post(self, request):
         mask = int(str(FlowMask.objects.first()))
         position = int(request.data['flow']) - 1
+        new_mask = None
         if request.data['condition'] and type(request.data['condition']) == bool:
             new_mask = mask | (1 << position)
-            if FlowMask.objects.count() == 0:
-                FlowMask.objects.create(mask=new_mask)
-            elif FlowMask.objects.count() == 1:
-                FlowMask.objects.update(mask=new_mask)
-            cache.set(self.mask_key, bin(new_mask)[2:])
         elif not request.data['condition'] and type(request.data['condition']) == bool:
             new_mask = mask & ~(1 << position)
-            if FlowMask.objects.count() == 0:
-                FlowMask.objects.create(mask=new_mask)
-            elif FlowMask.objects.count() == 1:
-                FlowMask.objects.update(mask=new_mask)
-            cache.set(self.mask_key, bin(new_mask)[2:])
+        if FlowMask.objects.count() == 0:
+            FlowMask.objects.create(mask=new_mask)
+        elif FlowMask.objects.count() == 1:
+            FlowMask.objects.update(mask=new_mask)
+        cache.set(self.mask_key, bin(new_mask)[2:])
         return Response()
