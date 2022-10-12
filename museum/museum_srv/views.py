@@ -17,9 +17,10 @@ class VideoStandPageAPIView(APIView):
         return Response({"page": f"{current_page}"})
 
     def post(self, request):
-        if VideoStandPage.objects.count() == 0:
+        count_of_records = VideoStandPage.objects.count()
+        if count_of_records == 0:
             VideoStandPage.objects.create(page=request.data['page'])
-        elif VideoStandPage.objects.count() == 1:
+        elif count_of_records == 1:
             VideoStandPage.objects.update(page=request.data['page'])
         cache.set(self.page_key, request.data['page'])
         return Response()
@@ -38,15 +39,16 @@ class VideoStandEmployeeAPIView(APIView):
     def get(self, request):
         current_employee = cache.get(self.employee_key)
         if not current_employee:
-            employee = VideoStandEmployee.objects.filter(pk=1).values('current_employee')
+            employee = VideoStandEmployee.objects.first()
             cache.set(self.employee_key, employee)
             current_employee = employee
         return Response({"employee": f"{current_employee}"})
 
     def post(self, request):
-        if VideoStandEmployee.objects.count() == 0:
+        count_of_records = VideoStandEmployee.objects.count()
+        if count_of_records == 0:
             VideoStandEmployee.objects.create(current_employee=request.data['current_employee'])
-        elif VideoStandEmployee.objects.count() == 1:
+        elif count_of_records == 1:
             VideoStandEmployee.objects.update(current_employee=request.data['current_employee'])
         cache.set(self.employee_key, request.data['current_employee'])
         return Response()
@@ -64,57 +66,57 @@ class TimeLineAPIView(APIView):
         return Response({"year": f"{current_year}"})
 
     def post(self, request):
-        if TimeLine.objects.count() == 0:
+        count_of_records = TimeLine.objects.count()
+        if count_of_records == 0:
             TimeLine.objects.create(year=request.data['year'])
-        elif TimeLine.objects.count() == 1:
+        elif count_of_records == 1:
             TimeLine.objects.update(year=request.data['year'])
         cache.set(self.year_key, request.data['year'])
         return Response()
 
 
 class TimeLineVideoAPIView(APIView):
-    def get(self, request, year, video):
-        video_index = video
-        video = TimeLine.objects.filter(year=year).values(f'video_{video_index}')
-        video_path = video.first()[f'video_{video_index}']
+    def get(self, request, year, video_index):
+        video = TimeLine.objects.filter(year=year).values \
+            (f'video_{video_index}', f'video_{video_index}_duration').first()
+        video_path = video[f'video_{video_index}']
         final_path = f'/media/{video_path}'
 
-        duration = \
-            TimeLine.objects.filter(year=year).values(f'video_{video_index}_duration').first() \
-                [f'video_{video_index}_duration']
+        duration = video[f'video_{video_index}_duration']
 
         return Response({"current_video": f"{final_path}",
                          "video_duration": f"{duration}"})
 
 
 class AreaSamaraAPIView(APIView):
-    pipeline_key = 'area_samara_pipeline'
+    stage_key = 'area_samara_stage'
 
     def get(self, request):
-        current_pipeline = cache.get(self.pipeline_key)
-        if not current_pipeline:
-            pipeline = AreaSamara.objects.first()
-            cache.set(self.pipeline_key, pipeline)
-            current_pipeline = pipeline
-        return Response({"pipeline": f"{current_pipeline}"})
+        current_stage = cache.get(self.stage_key)
+        if not current_stage:
+            stage = AreaSamara.objects.first()
+            cache.set(self.stage_key, stage)
+            current_stage = stage
+        return Response({"stage": f"{current_stage}"})
 
     def post(self, request):
-        if AreaSamara.objects.count() == 0:
-            AreaSamara.objects.create(pipeline=request.data['pipeline'])
-        elif AreaSamara.objects.count() == 1:
-            AreaSamara.objects.update(pipeline=request.data['pipeline'])
-        cache.set(self.pipeline_key, request.data['pipeline'])
+        count_of_records = AreaSamara.objects.count()
+        if count_of_records == 0:
+            AreaSamara.objects.create(stage=request.data['stage'])
+        elif count_of_records == 1:
+            AreaSamara.objects.update(stage=request.data['stage'])
+        cache.set(self.stage_key, request.data['stage'])
         # requests.get(controller_link)
         return Response()
 
 
 class AreaSamaraVideoAPIView(APIView):
     def get(self, request, stage):
-        video = AreaSamara.objects.filter(stage=stage).values('video')
-        video_path = video.first()['video']
+        video = AreaSamara.objects.filter(stage=stage).values('video', 'video_duration').first()
+        video_path = video['video']
         final_path = f'/media/{video_path}'
 
-        duration = AreaSamara.objects.filter(stage=stage).values('video_duration').first()['video_duration']
+        duration = video['video_duration']
 
         return Response({"current_video": f"{final_path}",
                          "video_duration": f"{duration}"})
@@ -126,15 +128,16 @@ class TechnologiesStageAPIView(APIView):
     def get(self, request):
         current_stage = cache.get(self.stage_key)
         if not current_stage:
-            stage = Technologies.objects.filter(pk=1).values('stage')
+            stage = Technologies.objects.first()
             cache.set(self.stage_key, stage)
             current_stage = stage
         return Response({"stage": f"{current_stage}"})
 
     def post(self, request):
-        if Technologies.objects.count() == 0:
+        count_of_records = Technologies.objects.count()
+        if count_of_records == 0:
             Technologies.objects.create(stage=request.data['stage'])
-        elif Technologies.objects.count() == 1:
+        elif count_of_records == 1:
             Technologies.objects.update(stage=request.data['stage'])
         cache.set(self.stage_key, request.data['stage'])
         # request.get(controller_link)
@@ -144,12 +147,11 @@ class TechnologiesStageAPIView(APIView):
 class TechnologiesFourthAPIView(APIView):
     def get(self, request, label):
         fourth_video = TechnologiesFourth.objects \
-            .filter(label=label).values('fourth_stage_video', 'fourth_stage_video_duration')
-        fourth_video_path = fourth_video.first()['fourth_stage_video']
+            .filter(label=label).values('fourth_stage_video', 'fourth_stage_video_duration').first()
+        fourth_video_path = fourth_video['fourth_stage_video']
         final_path = f'/media/{fourth_video_path}'
 
-        duration = TechnologiesFourth.objects \
-            .filter(label=label).values('fourth_stage_video_duration').first()['fourth_stage_video_duration']
+        duration = fourth_video['fourth_stage_video_duration']
 
         return Response({"current_video": f"{final_path}",
                          "video_duration": f"{duration}"})
@@ -161,15 +163,16 @@ class TechnologiesVideoLabelAPIView(APIView):
     def get(self, request):
         current_label = cache.get(self.label_key)
         if not current_label:
-            label = TechnologiesFourth.objects.values('label').first()['label']
+            label = TechnologiesFourth.objects.first()
             cache.set(self.label_key, label)
             current_label = label
         return Response({"label": f"{current_label}"})
 
     def post(self, request):
-        if TechnologiesFourth.objects.count() == 0:
+        count_of_records = TechnologiesFourth.objects.count()
+        if count_of_records == 0:
             TechnologiesFourth.objects.create(label=request.data['label'])
-        elif TechnologiesFourth.objects.count() == 1:
+        elif count_of_records == 1:
             TechnologiesFourth.objects.update(label=request.data['label'])
         cache.set(self.label_key, request.data['label'])
         return Response()
@@ -178,12 +181,11 @@ class TechnologiesVideoLabelAPIView(APIView):
 class TechnologiesMovingAndBackstageAPIView(APIView):
     def get(self, request, video_type, stage):
         video = Technologies.objects \
-            .filter(stage=stage).values(f'{video_type}_video', f'{video_type}_video_duration')
-        video_path = video.first()[f'{video_type}_video']
+            .filter(stage=stage).values(f'{video_type}_video', f'{video_type}_video_duration').first()
+        video_path = video[f'{video_type}_video']
         final_path = f'/media/{video_path}'
 
-        duration = Technologies.objects \
-            .filter(stage=stage).values(f'{video_type}_video_duration').first()[f'{video_type}_video_duration']
+        duration = video[f'{video_type}_video_duration']
 
         return Response({"current_video": f"{final_path}",
                          "video_duration": f"{duration}"})
@@ -208,9 +210,10 @@ class FlowMaskAPIView(APIView):
             new_mask = mask | (1 << position)
         elif not request.data['condition'] and type(request.data['condition']) == bool:
             new_mask = mask & ~(1 << position)
-        if FlowMask.objects.count() == 0:
+        count_of_records = FlowMask.objects.count()
+        if count_of_records == 0:
             FlowMask.objects.create(mask=new_mask)
-        elif FlowMask.objects.count() == 1:
+        elif count_of_records == 1:
             FlowMask.objects.update(mask=new_mask)
         cache.set(self.mask_key, bin(new_mask)[2:])
         return Response()
