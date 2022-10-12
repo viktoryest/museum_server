@@ -49,7 +49,7 @@ urlpatterns = [
     path('api/timeline/year/', TimeLineAPIView.as_view()),
     path('api/timeline/<year>/<int:video_index>/', TimeLineVideoAPIView.as_view()),
     path('api/area_samara/stage/', AreaSamaraAPIView.as_view()),
-    path('api/area_samara/<stage>/video/', AreaSamaraVideoAPIView.as_view()),
+    path('api/area_samara/<int:stage>/video/', AreaSamaraVideoAPIView.as_view()),
     path('api/technologies/stage/', TechnologiesStageAPIView.as_view()),
     path('api/technologies/video_label/', TechnologiesVideoLabelAPIView.as_view()),
     path('api/technologies/fourth_video/<label>/', TechnologiesFourthAPIView.as_view()),
