@@ -24,7 +24,16 @@ SECRET_KEY = 'django-insecure-own#_w6wwipxyunp-(su=eogakl+s_umym*&^-325+d!u(2(8v
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+CORS_ORIGIN_ALLOW_ALL = True
+ALLOWED_HOSTS = [
+    '127.0.0.1',
+]
+
+CORS_ALLOWED_ORIGINS = [
+    'http://127.0.0.1',
+]
+CORS_ALLOW_CREDENTIALS = False
+CORS_ALLOW_METHODS = ['DELETE', 'GET', 'OPTIONS', 'PATCH', 'POST', 'PUT']
 
 # Application definition
 
@@ -38,6 +47,7 @@ INSTALLED_APPS = [
     'museum_srv.apps.MuseumSrvConfig',
     'rest_framework',
     'drf_yasg',
+    'corsheaders',
 ]
 
 MIDDLEWARE = [
@@ -48,6 +58,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.common.CommonMiddleware',
 ]
 
 ROOT_URLCONF = 'museum.urls'
