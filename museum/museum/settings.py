@@ -27,11 +27,16 @@ DEBUG = True
 CORS_ORIGIN_ALLOW_ALL = True
 ALLOWED_HOSTS = [
     '127.0.0.1',
-    'http://localhost',
+    '127.0.0.1:3000',
+    'localhost',
+    'localhost:3000',
 ]
 
 CORS_ALLOWED_ORIGINS = [
     'http://127.0.0.1',
+    'http://127.0.0.1:3000',
+    'http://localhost',
+    'http://localhost:3000'
 ]
 CORS_ALLOW_CREDENTIALS = False
 CORS_ALLOW_METHODS = ['DELETE', 'GET', 'OPTIONS', 'PATCH', 'POST', 'PUT']
