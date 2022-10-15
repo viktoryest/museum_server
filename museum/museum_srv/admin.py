@@ -1,5 +1,6 @@
 from django.contrib import admin
-from .models import VideoStandEmployee, TimeLine, AreaSamara, Technologies, FlowMask, TechnologiesFourth
+from .models import VideoStandEmployee, TimeLine, AreaSamara, Technologies, FlowMask, TechnologiesFourth, \
+    VideoStandCurrentEmployee
 
 admin.site.disable_action('delete_selected')
 admin.site.register(VideoStandEmployee)

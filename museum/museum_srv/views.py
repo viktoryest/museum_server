@@ -1,6 +1,7 @@
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from .models import VideoStandPage, VideoStandEmployee, TimeLine, AreaSamara, Technologies, FlowMask, TechnologiesFourth
+from .models import VideoStandPage, VideoStandEmployee, VideoStandCurrentEmployee, TimeLine, AreaSamara, Technologies,\
+    FlowMask, TechnologiesFourth
 from django.core.cache import cache
 from exceptions import *
 
@@ -36,7 +37,6 @@ class VideoStandPageAPIView(APIView):
                 VideoStandPage.objects.create(page=request.data['page'])
             elif count_of_records == 1:
                 VideoStandPage.objects.update(page=request.data['page'])
-                VideoStandPage.objects.create(page='test')
             else:
                 raise OverInstancesException("The count of VideoStandPage instances is more than 1. "
                                              "Most likely, some of them were added manually. Please, check your tables "
@@ -55,9 +55,13 @@ class VideoStandEmployeeListAPIView(APIView):
         # handles get-requests from the app, returns a list of the honorable employees,
         # that contains id, fio(surname, name, patronymic), job, description, path to the photo;
         # you should specify the group in the parameters: it might be "fame" or "veterans"
-        employee_list = \
-            VideoStandEmployee.objects.filter(group=group).values('id', 'fio', 'job', 'description', 'photo')
-        return Response({"employees": employee_list})
+        try:
+            employee_list = \
+                VideoStandEmployee.objects.filter(group=group).values('id', 'fio', 'job', 'description', 'photo')
+            return Response({"employees": employee_list})
+        except DataBaseException:
+            return Response(data="Unknown database error. Please, check tables and file models.py",
+                            status=500, exception=True)
 
 
 class VideoStandEmployeeAPIView(APIView):
@@ -66,22 +70,34 @@ class VideoStandEmployeeAPIView(APIView):
 
     def get(self, request) -> Response:
         # handles get-requests from the app, returns selected employee
-        current_employee = cache.get(self.employee_key)
-        if not current_employee:
-            employee = VideoStandEmployee.objects.first()
-            cache.set(self.employee_key, employee)
-            current_employee = employee
-        return Response({"employee": f"{current_employee}"})
+        try:
+            current_employee = cache.get(self.employee_key)
+            if not current_employee:
+                employee = VideoStandCurrentEmployee.objects.first()
+                cache.set(self.employee_key, employee)
+                current_employee = employee
+            return Response({"employee": f"{current_employee}"})
+        except DataBaseException:
+            return Response(data="Unknown database error. Please, check tables and file models.py",
+                            status=500, exception=True)
 
     def post(self, request) -> Response:
         # handles post-request from the tablet, sets selected employee
-        count_of_records = VideoStandEmployee.objects.count()
-        if count_of_records == 0:
-            VideoStandEmployee.objects.create(current_employee=request.data['current_employee'])
-        elif count_of_records == 1:
-            VideoStandEmployee.objects.update(current_employee=request.data['current_employee'])
-        cache.set(self.employee_key, request.data['current_employee'])
-        return Response()
+        try:
+            count_of_records = VideoStandCurrentEmployee.objects.count()
+            if count_of_records == 0:
+                VideoStandCurrentEmployee.objects.create(current_employee=request.data['current_employee'])
+            elif count_of_records == 1:
+                VideoStandCurrentEmployee.objects.update(current_employee=request.data['current_employee'])
+            else:
+                raise OverInstancesException("The count of VideoStandCurrentEmployee instances is more than 1. "
+                                             "Most likely, some of them were added manually. Please, check your tables "
+                                             "and delete extra records to avoid mistakes")
+            cache.set(self.employee_key, request.data['current_employee'])
+            return Response()
+        except DataBaseException:
+            return Response(data="Unknown database error. Please, check tables and file models.py",
+                            status=500, exception=True)
 
 
 class TimeLineAPIView(APIView):

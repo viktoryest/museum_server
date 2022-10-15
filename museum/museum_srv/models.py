@@ -12,10 +12,12 @@ class VideoStandPage(models.Model):
 
     def __new__(cls, *args, **kwargs):
         if cls.instances is None:
-            cls.instances = super(models.Model, cls).__new__(cls)
-        raise OverInstancesException \
-            ("You're trying create two or more instances of the singleton class VideoStandPage. Please, check your "
-             "code in the post-request")
+            cls.instances = super().__new__(cls)
+            return cls.instances
+        else:
+            raise OverInstancesException \
+                ("You're trying to create two or more instances of the singleton class VideoStandPage. "
+                 "Please, check your post-request handler code")
 
     def __del__(self):
         VideoStandPage.instances = None
@@ -31,10 +33,29 @@ class VideoStandEmployee(models.Model):
     description = models.TextField()
     photo = models.ImageField(upload_to='static/employees/images')
     order = models.IntegerField()
-    current_employee = models.CharField(max_length=100)
 
     def __str__(self):
         return self.fio
+
+
+class VideoStandCurrentEmployee(models.Model):
+    current_employee = models.CharField(max_length=100)
+    instances = None
+
+    def __new__(cls, *args, **kwargs):
+        if cls.instances is None:
+            cls.instances = super().__new__(cls)
+            return cls.instances
+        else:
+            raise OverInstancesException \
+                ("You're trying to create two or more instances of the singleton class VideoStandCurrentEmployee. "
+                 "Please, check your post-request handler code")
+
+    def __del__(self):
+        VideoStandCurrentEmployee.instances = None
+
+    def __str__(self):
+        return self.current_employee
 
 
 class TimeLine(models.Model):
