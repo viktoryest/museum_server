@@ -3,10 +3,22 @@ from model_utils import Choices
 from moviepy.editor import VideoFileClip
 import os
 from museum.settings import BASE_DIR
+from exceptions import *
 
 
 class VideoStandPage(models.Model):
     page = models.CharField(max_length=50)
+    instances = None
+
+    def __new__(cls, *args, **kwargs):
+        if cls.instances is None:
+            cls.instances = super(models.Model, cls).__new__(cls)
+        raise OverInstancesException \
+            ("You're trying create two or more instances of the singleton class VideoStandPage. Please, check your "
+             "code in the post-request")
+
+    def __del__(self):
+        VideoStandPage.instances = None
 
     def __str__(self):
         return self.page

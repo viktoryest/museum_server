@@ -2,6 +2,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from .models import VideoStandPage, VideoStandEmployee, TimeLine, AreaSamara, Technologies, FlowMask, TechnologiesFourth
 from django.core.cache import cache
+from exceptions import *
 
 
 # import requests - for sending a request to the controller
@@ -13,26 +14,43 @@ class VideoStandPageAPIView(APIView):
 
     def get(self, request) -> Response:
         # handles get-requests from the app, returns selected page (chapter)
-        current_page = cache.get(self.page_key)
-        if not current_page:
-            page = VideoStandPage.objects.first()
-            cache.set(self.page_key, page)
-            current_page = page
-        return Response({"page": f"{current_page}"})
+        try:
+            current_page = cache.get(self.page_key)
+            if not current_page:
+                page = VideoStandPage.objects.first()
+                cache.set(self.page_key, page)
+                current_page = page
+            if current_page is None:
+                return Response(data="The page hasn't been set. Make sure you sent a corresponding post-request",
+                                status=500, exception=True)
+            return Response({"page": f"{current_page}"})
+        except DataBaseException:
+            return Response(data="Unknown database error. Please, check tables and file models.py",
+                            status=500, exception=True)
 
     def post(self, request) -> Response:
         # handles post-requests from the tablet, sets selected page (chapter)
-        count_of_records = VideoStandPage.objects.count()
-        if count_of_records == 0:
-            VideoStandPage.objects.create(page=request.data['page'])
-        elif count_of_records == 1:
-            VideoStandPage.objects.update(page=request.data['page'])
-        cache.set(self.page_key, request.data['page'])
-        return Response()
+        try:
+            count_of_records = VideoStandPage.objects.count()
+            if count_of_records == 0:
+                VideoStandPage.objects.create(page=request.data['page'])
+            elif count_of_records == 1:
+                VideoStandPage.objects.update(page=request.data['page'])
+                VideoStandPage.objects.create(page='test')
+            else:
+                raise OverInstancesException("The count of VideoStandPage instances is more than 1. "
+                                             "Most likely, some of them were added manually. Please, check your tables "
+                                             "and delete extra records to avoid mistakes")
+            cache.set(self.page_key, request.data['page'])
+            return Response()
+        except DataBaseException:
+            return Response(data="Unknown database error. Please, check tables and file models.py",
+                            status=500, exception=True)
 
 
 class VideoStandEmployeeListAPIView(APIView):
     """Honorable employees list in Video Stand"""
+
     def get(self, request, group: str) -> Response:
         # handles get-requests from the app, returns a list of the honorable employees,
         # that contains id, fio(surname, name, patronymic), job, description, path to the photo;
@@ -92,6 +110,7 @@ class TimeLineAPIView(APIView):
 
 class TimeLineVideoAPIView(APIView):
     """Video by selected year and necessary index (first or second - there are two videos for each of years)"""
+
     def get(self, request, year: [int, str], video_index: int) -> Response:
         # handles get-requests from the second app, returns video path and its duration:
         # you should specify one of the following years: 1936, 1953, 1961, 1970, 1980s, 1990s, 2000s, 2010s and
@@ -165,6 +184,7 @@ class AreaSamaraAPIView(APIView):
 
 class AreaSamaraVideoAPIView(APIView):
     """Video in Area Samara"""
+
     def get(self, request, stage: int) -> Response:
         # handles get-request from the app, returns video path and its duration,
         # you should specify the number of the stage: 1, 2, 3 or 4
@@ -206,6 +226,7 @@ class TechnologiesStageAPIView(APIView):
 
 class TechnologiesFourthAPIView(APIView):
     """Fourth stage in Technologies"""
+
     def get(self, request, label: str) -> Response:
         # handles get-requests from the moving screen, returns video path and its duration
         # according to specified label (that was specified in TechnologiesVideoLabelAPIView)
@@ -247,6 +268,7 @@ class TechnologiesVideoLabelAPIView(APIView):
 
 class TechnologiesMovingAndBackstageAPIView(APIView):
     """Video on the moving screen on stages 1-3 (and at the beginning of the 4th) and the backstage video"""
+
     def get(self, request, video_type: str, stage: int) -> Response:
         # handles get-requests from the app with the backstage video and from the moving screen,
         # returns video path and its duration
