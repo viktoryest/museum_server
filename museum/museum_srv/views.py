@@ -1,7 +1,7 @@
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from .models import VideoStandPage, VideoStandEmployee, VideoStandCurrentEmployee, TimeLine, AreaSamara, Technologies,\
-    FlowMask, TechnologiesFourth
+from .models import VideoStandPage, VideoStandEmployee, VideoStandCurrentEmployee, TimeLine, TimeLineCurrentYear, \
+    AreaSamara, AreaSamaraCurrentStage, Technologies, FlowMask, TechnologiesFourth
 from django.core.cache import cache
 from exceptions import *
 
@@ -15,15 +15,13 @@ class VideoStandPageAPIView(APIView):
 
     def get(self, request) -> Response:
         # handles get-requests from the app, returns selected page (chapter)
+        # attention: if page hasn't been selected, will be returned None instead of current_page
         try:
             current_page = cache.get(self.page_key)
             if not current_page:
                 page = VideoStandPage.objects.first()
                 cache.set(self.page_key, page)
                 current_page = page
-            if current_page is None:
-                return Response(data="The page hasn't been set. Make sure you sent a corresponding post-request",
-                                status=500, exception=True)
             return Response({"page": f"{current_page}"})
         except DataBaseException:
             return Response(data="Unknown database error. Please, check tables and file models.py",
@@ -70,6 +68,7 @@ class VideoStandEmployeeAPIView(APIView):
 
     def get(self, request) -> Response:
         # handles get-requests from the app, returns selected employee
+        # attention: if employee hasn't been selected, will be returned None instead of current_employee
         try:
             current_employee = cache.get(self.employee_key)
             if not current_employee:
@@ -100,28 +99,37 @@ class VideoStandEmployeeAPIView(APIView):
                             status=500, exception=True)
 
 
-class TimeLineAPIView(APIView):
+class TimeLineYearAPIView(APIView):
     """Selected year in Timeline"""
     year_key = 'timeline_year'
 
     def get(self, request) -> Response:
         # handles get-requests from the second app, returns selected year
-        current_year = cache.get(self.year_key)
-        if not current_year:
-            year = TimeLine.objects.first()
-            cache.set(self.year_key, year)
-            current_year = year
-        return Response({"year": f"{current_year}"})
+        # attention: if year hasn't been selected, will be returned None instead of current_year
+        try:
+            current_year = cache.get(self.year_key)
+            if not current_year:
+                year = TimeLineCurrentYear.objects.first()
+                cache.set(self.year_key, year)
+                current_year = year
+            return Response({"year": f"{current_year}"})
+        except DataBaseException:
+            return Response(data="Unknown database error. Please, check tables and file models.py",
+                            status=500, exception=True)
 
     def post(self, request) -> Response:
         # handles post-requests from the first app, sets selected year
-        count_of_records = TimeLine.objects.count()
-        if count_of_records == 0:
-            TimeLine.objects.create(year=request.data['year'])
-        elif count_of_records == 1:
-            TimeLine.objects.update(year=request.data['year'])
-        cache.set(self.year_key, request.data['year'])
-        return Response()
+        try:
+            count_of_records = TimeLineCurrentYear.objects.count()
+            if count_of_records == 0:
+                TimeLineCurrentYear.objects.create(current_year=request.data['year'])
+            elif count_of_records == 1:
+                TimeLineCurrentYear.objects.update(current_year=request.data['year'])
+            cache.set(self.year_key, request.data['year'])
+            return Response()
+        except DataBaseException:
+            return Response(data="Unknown database error. Please, check tables and file models.py",
+                            status=500, exception=True)
 
 
 class TimeLineVideoAPIView(APIView):
@@ -131,15 +139,19 @@ class TimeLineVideoAPIView(APIView):
         # handles get-requests from the second app, returns video path and its duration:
         # you should specify one of the following years: 1936, 1953, 1961, 1970, 1980s, 1990s, 2000s, 2010s and
         # video index: 1 or 2
-        video = TimeLine.objects.filter(year=year).values \
-            (f'video_{video_index}', f'video_{video_index}_duration').first()
-        video_path = video[f'video_{video_index}']
-        final_path = f'/media/{video_path}'
+        try:
+            video = TimeLine.objects.filter(year=year).values \
+                (f'video_{video_index}', f'video_{video_index}_duration').first()
+            video_path = video[f'video_{video_index}']
+            final_path = f'/media/{video_path}'
 
-        duration = video[f'video_{video_index}_duration']
+            duration = video[f'video_{video_index}_duration']
 
-        return Response({"current_video": f"{final_path}",
-                         "video_duration": f"{duration}"})
+            return Response({"current_video": f"{final_path}",
+                             "video_duration": f"{duration}"})
+        except DataBaseException:
+            return Response(data="Unknown database error. Please, check tables and file models.py",
+                            status=500, exception=True)
 
 
 class FlowMaskAPIView(APIView):
@@ -148,12 +160,18 @@ class FlowMaskAPIView(APIView):
 
     def get(self, request) -> Response:
         # handles get-requests from the app, returns a mask for on and off flows
-        current_mask = cache.get(self.mask_key)
-        if not current_mask:
-            mask = bin(int(str(FlowMask.objects.first())))
-            cache.set(self.mask_key, mask)
-            current_mask = mask
-        return Response({"mask": f"{current_mask}"})
+        # attention: if mask hasn't been set, will be returned None instead of mask
+        try:
+            current_mask = cache.get(self.mask_key)
+            if not current_mask:
+                mask_record = FlowMask.objects.first()
+                mask = bin(int(str(mask_record)))
+                cache.set(self.mask_key, mask)
+                current_mask = mask
+            return Response({"mask": f"{current_mask}"})
+        except DataBaseException:
+            return Response(data="Unknown database error. Please, check tables and file models.py",
+                            status=500, exception=True)
 
     def post(self, request) -> Response:
         # handles post-requests from the tablet, sets a mask for on and off flows
@@ -173,7 +191,7 @@ class FlowMaskAPIView(APIView):
         return Response()
 
 
-class AreaSamaraAPIView(APIView):
+class AreaSamaraStageAPIView(APIView):
     """Selected stage in Area Samara"""
     stage_key = 'area_samara_stage'
 
@@ -181,18 +199,18 @@ class AreaSamaraAPIView(APIView):
         # handles get-requests from the app, returns selected stage
         current_stage = cache.get(self.stage_key)
         if not current_stage:
-            stage = AreaSamara.objects.first()
+            stage = AreaSamaraCurrentStage.objects.first()
             cache.set(self.stage_key, stage)
             current_stage = stage
         return Response({"stage": f"{current_stage}"})
 
     def post(self, request) -> Response:
         # handles post-requests from the tablet, sets selected stage
-        count_of_records = AreaSamara.objects.count()
+        count_of_records = AreaSamaraCurrentStage.objects.count()
         if count_of_records == 0:
-            AreaSamara.objects.create(stage=request.data['stage'])
+            AreaSamaraCurrentStage.objects.create(stage=request.data['stage'])
         elif count_of_records == 1:
-            AreaSamara.objects.update(stage=request.data['stage'])
+            AreaSamaraCurrentStage.objects.update(stage=request.data['stage'])
         cache.set(self.stage_key, request.data['stage'])
         # requests.get(controller_link)
         return Response()

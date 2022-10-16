@@ -72,14 +72,14 @@ class TimeLine(models.Model):
             final_path_1 = f'media/{video_1}'
             clip_1 = VideoFileClip(os.path.join(BASE_DIR, final_path_1))
             video_1_duration = clip_1.duration
-            TimeLine.objects.update(video_1_duration=video_1_duration)
+            TimeLine.objects.filter(year=self.year).update(video_1_duration=video_1_duration)
 
         video_2 = self.video_2
         if video_2:
             final_path_2 = f'media/{video_2}'
             clip_2 = VideoFileClip(os.path.join(BASE_DIR, final_path_2))
             video_2_duration = clip_2.duration
-            TimeLine.objects.update(video_2_duration=video_2_duration)
+            TimeLine.objects.filter(year=self.year).update(video_2_duration=video_2_duration)
 
     @classmethod
     def check_timeline_videos(cls):
@@ -90,6 +90,46 @@ class TimeLine(models.Model):
 
     def __str__(self):
         return self.year
+
+
+class TimeLineCurrentYear(models.Model):
+    current_year = models.CharField(max_length=10)
+    instances = None
+
+    def __new__(cls, *args, **kwargs):
+        if cls.instances is None:
+            cls.instances = super().__new__(cls)
+            return cls.instances
+        else:
+            raise OverInstancesException \
+                ("You're trying to create two or more instances of the singleton class VideoStandCurrentEmployee. "
+                 "Please, check your post-request handler code")
+
+    def __del__(self):
+        TimeLineCurrentYear.instances = None
+
+    def __str__(self):
+        return self.current_year
+
+
+class FlowMask(models.Model):
+    mask = models.CharField(max_length=9)
+    instances = None
+
+    def __new__(cls, *args, **kwargs):
+        if cls.instances is None:
+            cls.instances = super().__new__(cls)
+            return cls.instances
+        else:
+            raise OverInstancesException \
+                ("You're trying to create two or more instances of the singleton class VideoStandCurrentEmployee. "
+                 "Please, check your post-request handler code")
+
+    def __del__(self):
+        FlowMask.instances = None
+
+    def __str__(self):
+        return self.mask
 
 
 class AreaSamara(models.Model):
@@ -103,10 +143,30 @@ class AreaSamara(models.Model):
         final_path = f'media/{video}'
         clip = VideoFileClip(os.path.join(BASE_DIR, final_path))
         video_duration = clip.duration
-        AreaSamara.objects.update(video_duration=video_duration)
+        AreaSamara.objects.filter(stage=self.stage).update(video_duration=video_duration)
 
     def __str__(self):
         return self.stage
+
+
+class AreaSamaraCurrentStage(models.Model):
+    current_stage = models.CharField(max_length=10)
+    instances = None
+
+    def __new__(cls, *args, **kwargs):
+        if cls.instances is None:
+            cls.instances = super().__new__(cls)
+            return cls.instances
+        else:
+            raise OverInstancesException \
+                ("You're trying to create two or more instances of the singleton class VideoStandCurrentEmployee. "
+                 "Please, check your post-request handler code")
+
+    def __del__(self):
+        AreaSamaraCurrentStage.instances = None
+
+    def __str__(self):
+        return self.current_stage
 
 
 class Technologies(models.Model):
@@ -123,13 +183,13 @@ class Technologies(models.Model):
         back_final_path = f'media/{backstage_video}'
         back_clip = VideoFileClip(os.path.join(BASE_DIR, back_final_path))
         back_video_duration = back_clip.duration
-        Technologies.objects.update(backstage_video_duration=back_video_duration)
+        Technologies.objects.filter(stage=self.stage).update(backstage_video_duration=back_video_duration)
 
         moving_video = self.moving_video
         mov_final_path = f'media/{moving_video}'
         mov_clip = VideoFileClip(os.path.join(BASE_DIR, mov_final_path))
         mov_video_duration = mov_clip.duration
-        Technologies.objects.update(moving_video_duration=mov_video_duration)
+        Technologies.objects.filter(stage=self.stage).update(moving_video_duration=mov_video_duration)
 
     def __str__(self):
         return self.stage
@@ -146,11 +206,4 @@ class TechnologiesFourth(models.Model):
         final_path = f'media/{fourth_stage_video}'
         clip = VideoFileClip(os.path.join(BASE_DIR, final_path))
         video_duration = clip.duration
-        TechnologiesFourth.objects.update(fourth_stage_video_duration=video_duration)
-
-
-class FlowMask(models.Model):
-    mask = models.CharField(max_length=9)
-
-    def __str__(self):
-        return self.mask
+        TechnologiesFourth.objects.filter(label=self.label).update(fourth_stage_video_duration=video_duration)
