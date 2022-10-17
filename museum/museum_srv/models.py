@@ -8,19 +8,6 @@ from exceptions import *
 
 class VideoStandPage(models.Model):
     page = models.CharField(max_length=50)
-    instances = None
-
-    def __new__(cls, *args, **kwargs):
-        if cls.instances is None:
-            cls.instances = super().__new__(cls)
-            return cls.instances
-        else:
-            raise OverInstancesException \
-                ("You're trying to create two or more instances of the singleton class VideoStandPage. "
-                 "Please, check your post-request handler code")
-
-    def __del__(self):
-        VideoStandPage.instances = None
 
     def __str__(self):
         return self.page
@@ -40,19 +27,6 @@ class VideoStandEmployee(models.Model):
 
 class VideoStandCurrentEmployee(models.Model):
     current_employee = models.CharField(max_length=100)
-    instances = None
-
-    def __new__(cls, *args, **kwargs):
-        if cls.instances is None:
-            cls.instances = super().__new__(cls)
-            return cls.instances
-        else:
-            raise OverInstancesException \
-                ("You're trying to create two or more instances of the singleton class VideoStandCurrentEmployee. "
-                 "Please, check your post-request handler code")
-
-    def __del__(self):
-        VideoStandCurrentEmployee.instances = None
 
     def __str__(self):
         return self.current_employee
@@ -94,19 +68,6 @@ class TimeLine(models.Model):
 
 class TimeLineCurrentYear(models.Model):
     current_year = models.CharField(max_length=10)
-    instances = None
-
-    def __new__(cls, *args, **kwargs):
-        if cls.instances is None:
-            cls.instances = super().__new__(cls)
-            return cls.instances
-        else:
-            raise OverInstancesException \
-                ("You're trying to create two or more instances of the singleton class VideoStandCurrentEmployee. "
-                 "Please, check your post-request handler code")
-
-    def __del__(self):
-        TimeLineCurrentYear.instances = None
 
     def __str__(self):
         return self.current_year
@@ -114,19 +75,6 @@ class TimeLineCurrentYear(models.Model):
 
 class FlowMask(models.Model):
     mask = models.CharField(max_length=9)
-    instances = None
-
-    def __new__(cls, *args, **kwargs):
-        if cls.instances is None:
-            cls.instances = super().__new__(cls)
-            return cls.instances
-        else:
-            raise OverInstancesException \
-                ("You're trying to create two or more instances of the singleton class VideoStandCurrentEmployee. "
-                 "Please, check your post-request handler code")
-
-    def __del__(self):
-        FlowMask.instances = None
 
     def __str__(self):
         return self.mask
@@ -151,19 +99,6 @@ class AreaSamara(models.Model):
 
 class AreaSamaraCurrentStage(models.Model):
     current_stage = models.CharField(max_length=10)
-    instances = None
-
-    def __new__(cls, *args, **kwargs):
-        if cls.instances is None:
-            cls.instances = super().__new__(cls)
-            return cls.instances
-        else:
-            raise OverInstancesException \
-                ("You're trying to create two or more instances of the singleton class VideoStandCurrentEmployee. "
-                 "Please, check your post-request handler code")
-
-    def __del__(self):
-        AreaSamaraCurrentStage.instances = None
 
     def __str__(self):
         return self.current_stage

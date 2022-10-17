@@ -164,8 +164,7 @@ class FlowMaskAPIView(APIView):
         try:
             current_mask = cache.get(self.mask_key)
             if not current_mask:
-                mask_record = FlowMask.objects.first()
-                mask = bin(int(str(mask_record)))
+                mask = FlowMask.objects.first()
                 cache.set(self.mask_key, mask)
                 current_mask = mask
             return Response({"mask": f"{current_mask}"})
@@ -175,20 +174,24 @@ class FlowMaskAPIView(APIView):
 
     def post(self, request) -> Response:
         # handles post-requests from the tablet, sets a mask for on and off flows
-        mask = int(str(FlowMask.objects.first()))
-        position = int(request.data['flow']) - 1
-        new_mask = None
-        if request.data['condition'] and type(request.data['condition']) == bool:
-            new_mask = mask | (1 << position)
-        elif not request.data['condition'] and type(request.data['condition']) == bool:
-            new_mask = mask & ~(1 << position)
-        count_of_records = FlowMask.objects.count()
-        if count_of_records == 0:
-            FlowMask.objects.create(mask=new_mask)
-        elif count_of_records == 1:
-            FlowMask.objects.update(mask=new_mask)
-        cache.set(self.mask_key, bin(new_mask)[2:])
-        return Response()
+        try:
+            mask = int(str(FlowMask.objects.first()))
+            position = int(request.data['flow']) - 1
+            new_mask = None
+            if request.data['condition'] and type(request.data['condition']) == bool:
+                new_mask = bin(mask | (1 << position))[2:].zfill(8)
+            elif not request.data['condition'] and type(request.data['condition']) == bool:
+                new_mask = bin(mask & ~(1 << position))[2:].zfill(8)
+            count_of_records = FlowMask.objects.count()
+            if count_of_records == 0:
+                FlowMask.objects.create(mask=new_mask)
+            elif count_of_records == 1:
+                FlowMask.objects.update(mask=new_mask)
+            cache.set(self.mask_key, new_mask)
+            return Response()
+        except DataBaseException:
+            return Response(data="Unknown database error. Please, check tables and file models.py",
+                            status=500, exception=True)
 
 
 class AreaSamaraStageAPIView(APIView):
@@ -197,23 +200,31 @@ class AreaSamaraStageAPIView(APIView):
 
     def get(self, request) -> Response:
         # handles get-requests from the app, returns selected stage
-        current_stage = cache.get(self.stage_key)
-        if not current_stage:
-            stage = AreaSamaraCurrentStage.objects.first()
-            cache.set(self.stage_key, stage)
-            current_stage = stage
-        return Response({"stage": f"{current_stage}"})
+        try:
+            current_stage = cache.get(self.stage_key)
+            if not current_stage:
+                stage = AreaSamaraCurrentStage.objects.first()
+                cache.set(self.stage_key, stage)
+                current_stage = stage
+            return Response({"stage": f"{current_stage}"})
+        except DataBaseException:
+            return Response(data="Unknown database error. Please, check tables and file models.py",
+                            status=500, exception=True)
 
     def post(self, request) -> Response:
         # handles post-requests from the tablet, sets selected stage
-        count_of_records = AreaSamaraCurrentStage.objects.count()
-        if count_of_records == 0:
-            AreaSamaraCurrentStage.objects.create(stage=request.data['stage'])
-        elif count_of_records == 1:
-            AreaSamaraCurrentStage.objects.update(stage=request.data['stage'])
-        cache.set(self.stage_key, request.data['stage'])
-        # requests.get(controller_link)
-        return Response()
+        try:
+            count_of_records = AreaSamaraCurrentStage.objects.count()
+            if count_of_records == 0:
+                AreaSamaraCurrentStage.objects.create(stage=request.data['stage'])
+            elif count_of_records == 1:
+                AreaSamaraCurrentStage.objects.update(stage=request.data['stage'])
+            cache.set(self.stage_key, request.data['stage'])
+            # requests.get(controller_link)
+            return Response()
+        except DataBaseException:
+            return Response(data="Unknown database error. Please, check tables and file models.py",
+                            status=500, exception=True)
 
 
 class AreaSamaraVideoAPIView(APIView):
@@ -222,14 +233,18 @@ class AreaSamaraVideoAPIView(APIView):
     def get(self, request, stage: int) -> Response:
         # handles get-request from the app, returns video path and its duration,
         # you should specify the number of the stage: 1, 2, 3 or 4
-        video = AreaSamara.objects.filter(stage=stage).values('video', 'video_duration').first()
-        video_path = video['video']
-        final_path = f'/media/{video_path}'
+        try:
+            video = AreaSamara.objects.filter(stage=stage).values('video', 'video_duration').first()
+            video_path = video['video']
+            final_path = f'/media/{video_path}'
 
-        duration = video['video_duration']
+            duration = video['video_duration']
 
-        return Response({"current_video": f"{final_path}",
-                         "video_duration": f"{duration}"})
+            return Response({"current_video": f"{final_path}",
+                             "video_duration": f"{duration}"})
+        except DataBaseException:
+            return Response(data="Unknown database error. Please, check tables and file models.py",
+                            status=500, exception=True)
 
 
 class TechnologiesStageAPIView(APIView):
