@@ -3,5 +3,4 @@ class DataBaseException(Exception):
 
 
 class OverInstancesException(Exception):
-    """This exception is raised during to attempt to create more instances of the class than it was expected.
-    Usually it applies to singleton classes"""
+    """This exception is raised during to attempt to create more instances of the class than it was expected"""

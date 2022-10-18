@@ -2,7 +2,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from .models import VideoStandPage, VideoStandEmployee, VideoStandCurrentEmployee, TimeLine, TimeLineCurrentYear, \
     FlowMask, AreaSamara, AreaSamaraCurrentStage, Technologies, TechnologiesCurrentStage, TechnologiesFourth, \
-    TechnologiesCurrentLabel
+    TechnologiesCurrentLabel, EntryGroupVideo
 from django.core.cache import cache
 from exceptions import *
 
@@ -347,3 +347,17 @@ class TechnologiesMovingAndBackstageAPIView(APIView):
         except DataBaseException:
             return Response(data="Unknown database error. Please, check tables and file models.py",
                             status=500, exception=True)
+
+
+class EntryGroupVideoAPIView(APIView):
+    """Video in Entry Group"""
+
+    def get(self, request) -> Response:
+        video = EntryGroupVideo.objects.values('video', 'video_duration').first()
+        video_path = video['video']
+        final_path = f'/media/{video_path}'
+
+        duration = video[f'video_duration']
+
+        return Response({"current_video": f"{final_path}",
+                         "video_duration": f"{duration}"})

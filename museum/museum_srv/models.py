@@ -156,3 +156,16 @@ class TechnologiesCurrentLabel(models.Model):
 
     def __str__(self):
         return self.label
+
+
+class EntryGroupVideo(models.Model):
+    video = models.FileField(upload_to='static/entry_group/video')
+    video_duration = models.CharField(max_length=100, blank=True)
+
+    def save(self, *args, **kwargs):
+        super(EntryGroupVideo, self).save(*args, **kwargs)
+        video = self.video
+        final_path = f'media/{video}'
+        clip = VideoFileClip(os.path.join(BASE_DIR, final_path))
+        video_duration = clip.duration
+        EntryGroupVideo.objects.filter(video=self.video).update(video_duration=video_duration)
