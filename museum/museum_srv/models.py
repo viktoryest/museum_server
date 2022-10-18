@@ -130,6 +130,13 @@ class Technologies(models.Model):
         return self.stage
 
 
+class TechnologiesCurrentStage(models.Model):
+    stage = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.stage
+
+
 class TechnologiesFourth(models.Model):
     label = models.CharField(max_length=100)
     fourth_stage_video = models.FileField(upload_to='static/technologies/video')
@@ -142,3 +149,10 @@ class TechnologiesFourth(models.Model):
         clip = VideoFileClip(os.path.join(BASE_DIR, final_path))
         video_duration = clip.duration
         TechnologiesFourth.objects.filter(label=self.label).update(fourth_stage_video_duration=video_duration)
+
+
+class TechnologiesCurrentLabel(models.Model):
+    label = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.label

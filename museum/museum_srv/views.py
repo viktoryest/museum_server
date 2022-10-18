@@ -1,7 +1,8 @@
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from .models import VideoStandPage, VideoStandEmployee, VideoStandCurrentEmployee, TimeLine, TimeLineCurrentYear, \
-    AreaSamara, AreaSamaraCurrentStage, Technologies, FlowMask, TechnologiesFourth
+    FlowMask, AreaSamara, AreaSamaraCurrentStage, Technologies, TechnologiesCurrentStage, TechnologiesFourth, \
+    TechnologiesCurrentLabel
 from django.core.cache import cache
 from exceptions import *
 
@@ -160,38 +161,29 @@ class FlowMaskAPIView(APIView):
 
     def get(self, request) -> Response:
         # handles get-requests from the app, returns a mask for on and off flows
-        # attention: if mask hasn't been set, will be returned None instead of mask
-        try:
-            current_mask = cache.get(self.mask_key)
-            if not current_mask:
-                mask = FlowMask.objects.first()
-                cache.set(self.mask_key, mask)
-                current_mask = mask
-            return Response({"mask": f"{current_mask}"})
-        except DataBaseException:
-            return Response(data="Unknown database error. Please, check tables and file models.py",
-                            status=500, exception=True)
+        current_mask = cache.get(self.mask_key)
+        if not current_mask:
+            mask = bin(int(str(FlowMask.objects.first())))[2:].zfill(7)
+            cache.set(self.mask_key, mask)
+            current_mask = mask
+        return Response({"mask": f"{current_mask}"})
 
     def post(self, request) -> Response:
         # handles post-requests from the tablet, sets a mask for on and off flows
-        try:
-            mask = int(str(FlowMask.objects.first()))
-            position = int(request.data['flow']) - 1
-            new_mask = None
-            if request.data['condition'] and type(request.data['condition']) == bool:
-                new_mask = bin(mask | (1 << position))[2:].zfill(8)
-            elif not request.data['condition'] and type(request.data['condition']) == bool:
-                new_mask = bin(mask & ~(1 << position))[2:].zfill(8)
-            count_of_records = FlowMask.objects.count()
-            if count_of_records == 0:
-                FlowMask.objects.create(mask=new_mask)
-            elif count_of_records == 1:
-                FlowMask.objects.update(mask=new_mask)
-            cache.set(self.mask_key, new_mask)
-            return Response()
-        except DataBaseException:
-            return Response(data="Unknown database error. Please, check tables and file models.py",
-                            status=500, exception=True)
+        mask = int(str(FlowMask.objects.first()))
+        position = int(request.data['flow']) - 1
+        new_mask = None
+        if request.data['condition'] and type(request.data['condition']) == bool:
+            new_mask = mask | (1 << position)
+        elif not request.data['condition'] and type(request.data['condition']) == bool:
+            new_mask = mask & ~(1 << position)
+        count_of_records = FlowMask.objects.count()
+        if count_of_records == 0:
+            FlowMask.objects.create(mask=new_mask)
+        elif count_of_records == 1:
+            FlowMask.objects.update(mask=new_mask)
+        cache.set(self.mask_key, bin(new_mask)[2:].zfill(7))
+        return Response()
 
 
 class AreaSamaraStageAPIView(APIView):
@@ -254,23 +246,31 @@ class TechnologiesStageAPIView(APIView):
     def get(self, request) -> Response:
         # handles get-requests from the app with the backstage video, the moving screen and the control screen,
         # returns selected stage
-        current_stage = cache.get(self.stage_key)
-        if not current_stage:
-            stage = Technologies.objects.first()
-            cache.set(self.stage_key, stage)
-            current_stage = stage
-        return Response({"stage": f"{current_stage}"})
+        try:
+            current_stage = cache.get(self.stage_key)
+            if not current_stage:
+                stage = TechnologiesCurrentStage.objects.first()
+                cache.set(self.stage_key, stage)
+                current_stage = stage
+            return Response({"stage": f"{current_stage}"})
+        except DataBaseException:
+            return Response(data="Unknown database error. Please, check tables and file models.py",
+                            status=500, exception=True)
 
     def post(self, request) -> Response:
         # handles post-requests from the tablet, sets selected stage
-        count_of_records = Technologies.objects.count()
-        if count_of_records == 0:
-            Technologies.objects.create(stage=request.data['stage'])
-        elif count_of_records == 1:
-            Technologies.objects.update(stage=request.data['stage'])
-        cache.set(self.stage_key, request.data['stage'])
-        # request.get(controller_link)
-        return Response()
+        try:
+            count_of_records = TechnologiesCurrentStage.objects.count()
+            if count_of_records == 0:
+                TechnologiesCurrentStage.objects.create(stage=request.data['stage'])
+            elif count_of_records == 1:
+                TechnologiesCurrentStage.objects.update(stage=request.data['stage'])
+            cache.set(self.stage_key, request.data['stage'])
+            # request.get(controller_link)
+            return Response()
+        except DataBaseException:
+            return Response(data="Unknown database error. Please, check tables and file models.py",
+                            status=500, exception=True)
 
 
 class TechnologiesFourthAPIView(APIView):
@@ -279,15 +279,19 @@ class TechnologiesFourthAPIView(APIView):
     def get(self, request, label: str) -> Response:
         # handles get-requests from the moving screen, returns video path and its duration
         # according to specified label (that was specified in TechnologiesVideoLabelAPIView)
-        fourth_video = TechnologiesFourth.objects \
-            .filter(label=label).values('fourth_stage_video', 'fourth_stage_video_duration').first()
-        fourth_video_path = fourth_video['fourth_stage_video']
-        final_path = f'/media/{fourth_video_path}'
+        try:
+            fourth_video = TechnologiesFourth.objects \
+                .filter(label=label).values('fourth_stage_video', 'fourth_stage_video_duration').first()
+            fourth_video_path = fourth_video['fourth_stage_video']
+            final_path = f'/media/{fourth_video_path}'
 
-        duration = fourth_video['fourth_stage_video_duration']
+            duration = fourth_video['fourth_stage_video_duration']
 
-        return Response({"current_video": f"{final_path}",
-                         "video_duration": f"{duration}"})
+            return Response({"current_video": f"{final_path}",
+                             "video_duration": f"{duration}"})
+        except DataBaseException:
+            return Response(data="Unknown database error. Please, check tables and file models.py",
+                            status=500, exception=True)
 
 
 class TechnologiesVideoLabelAPIView(APIView):
@@ -297,22 +301,30 @@ class TechnologiesVideoLabelAPIView(APIView):
     def get(self, request) -> Response:
         # handles get-requests from the moving screen, returns selected video label
         # (that was specified from the control screen in the method below)
-        current_label = cache.get(self.label_key)
-        if not current_label:
-            label = TechnologiesFourth.objects.first()
-            cache.set(self.label_key, label)
-            current_label = label
-        return Response({"label": f"{current_label}"})
+        try:
+            current_label = cache.get(self.label_key)
+            if not current_label:
+                label = TechnologiesCurrentLabel.objects.first()
+                cache.set(self.label_key, label)
+                current_label = label
+            return Response({"label": f"{current_label}"})
+        except DataBaseException:
+            return Response(data="Unknown database error. Please, check tables and file models.py",
+                            status=500, exception=True)
 
     def post(self, request) -> Response:
         # handles post-requests from the control screen, sets selected video label
-        count_of_records = TechnologiesFourth.objects.count()
-        if count_of_records == 0:
-            TechnologiesFourth.objects.create(label=request.data['label'])
-        elif count_of_records == 1:
-            TechnologiesFourth.objects.update(label=request.data['label'])
-        cache.set(self.label_key, request.data['label'])
-        return Response()
+        try:
+            count_of_records = TechnologiesCurrentLabel.objects.count()
+            if count_of_records == 0:
+                TechnologiesCurrentLabel.objects.create(label=request.data['label'])
+            elif count_of_records == 1:
+                TechnologiesCurrentLabel.objects.update(label=request.data['label'])
+            cache.set(self.label_key, request.data['label'])
+            return Response()
+        except DataBaseException:
+            return Response(data="Unknown database error. Please, check tables and file models.py",
+                            status=500, exception=True)
 
 
 class TechnologiesMovingAndBackstageAPIView(APIView):
@@ -322,12 +334,16 @@ class TechnologiesMovingAndBackstageAPIView(APIView):
         # handles get-requests from the app with the backstage video and from the moving screen,
         # returns video path and its duration
         # according to video type (moving or backstage) and the stage (1, 2, 3 or 4)
-        video = Technologies.objects \
-            .filter(stage=stage).values(f'{video_type}_video', f'{video_type}_video_duration').first()
-        video_path = video[f'{video_type}_video']
-        final_path = f'/media/{video_path}'
+        try:
+            video = Technologies.objects \
+                .filter(stage=stage).values(f'{video_type}_video', f'{video_type}_video_duration').first()
+            video_path = video[f'{video_type}_video']
+            final_path = f'/media/{video_path}'
 
-        duration = video[f'{video_type}_video_duration']
+            duration = video[f'{video_type}_video_duration']
 
-        return Response({"current_video": f"{final_path}",
-                         "video_duration": f"{duration}"})
+            return Response({"current_video": f"{final_path}",
+                             "video_duration": f"{duration}"})
+        except DataBaseException:
+            return Response(data="Unknown database error. Please, check tables and file models.py",
+                            status=500, exception=True)
