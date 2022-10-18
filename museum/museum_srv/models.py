@@ -76,6 +76,12 @@ class TimeLineCurrentYear(models.Model):
 class FlowMask(models.Model):
     mask = models.CharField(max_length=9)
 
+    @classmethod
+    def check_flows(cls):
+        count_of_records = cls.objects.count()
+        if count_of_records == 0:
+            cls.objects.create(mask='0000000')
+
     def __str__(self):
         return self.mask
 
@@ -110,6 +116,19 @@ class AreaSamaraCurrentStage(models.Model):
 
     def __str__(self):
         return self.stage
+
+
+class AreaSamaraAutoPlay(models.Model):
+    auto_play = models.BooleanField()
+
+    @classmethod
+    def check_area_samara_auto_play(cls):
+        count_of_records = cls.objects.count()
+        if count_of_records == 0:
+            cls.objects.create(auto_play=False)
+
+    def __str__(self):
+        return str(self.auto_play)
 
 
 class Technologies(models.Model):
@@ -188,6 +207,12 @@ class EntryGroupVideo(models.Model):
         clip = VideoFileClip(os.path.join(BASE_DIR, final_path))
         video_duration = clip.duration
         EntryGroupVideo.objects.filter(video=self.video).update(video_duration=video_duration)
+
+    @classmethod
+    def check_entry_group_video(cls):
+        count_of_records = cls.objects.count()
+        if count_of_records == 0:
+            cls.objects.create()
 
     def __str__(self):
         return 'Entry Group Video'

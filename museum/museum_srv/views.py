@@ -2,7 +2,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from .models import VideoStandPage, VideoStandEmployee, VideoStandCurrentEmployee, TimeLine, TimeLineCurrentYear, \
     FlowMask, AreaSamara, AreaSamaraCurrentStage, Technologies, TechnologiesCurrentStage, TechnologiesFourth, \
-    TechnologiesCurrentLabel, EntryGroupVideo
+    TechnologiesCurrentLabel, EntryGroupVideo, AreaSamaraAutoPlay
 from django.core.cache import cache
 from exceptions import *
 
@@ -37,9 +37,8 @@ class VideoStandPageAPIView(APIView):
             elif count_of_records == 1:
                 VideoStandPage.objects.update(page=request.data['page'])
             else:
-                raise OverInstancesException("The count of VideoStandPage instances is more than 1. "
-                                             "Most likely, some of them were added manually. Please, check your tables "
-                                             "and delete extra records to avoid mistakes")
+                VideoStandPage.objects.all().delete()
+                VideoStandPage.objects.create(page=request.data['page'])
             cache.set(self.page_key, request.data['page'])
             return Response()
         except DataBaseException:
@@ -90,9 +89,8 @@ class VideoStandEmployeeAPIView(APIView):
             elif count_of_records == 1:
                 VideoStandCurrentEmployee.objects.update(current_employee=request.data['current_employee'])
             else:
-                raise OverInstancesException("The count of VideoStandCurrentEmployee instances is more than 1. "
-                                             "Most likely, some of them were added manually. Please, check your tables "
-                                             "and delete extra records to avoid mistakes")
+                VideoStandCurrentEmployee.objects.all().delete()
+                VideoStandCurrentEmployee.objects.create(current_employee=request.data['current_employee'])
             cache.set(self.employee_key, request.data['current_employee'])
             return Response()
         except DataBaseException:
@@ -126,6 +124,9 @@ class TimeLineYearAPIView(APIView):
                 TimeLineCurrentYear.objects.create(current_year=request.data['year'])
             elif count_of_records == 1:
                 TimeLineCurrentYear.objects.update(current_year=request.data['year'])
+            else:
+                TimeLineCurrentYear.objects.all().delete()
+                TimeLineCurrentYear.objects.create(current_year=request.data['year'])
             cache.set(self.year_key, request.data['year'])
             return Response()
         except DataBaseException:
@@ -182,6 +183,9 @@ class FlowMaskAPIView(APIView):
             FlowMask.objects.create(mask=new_mask)
         elif count_of_records == 1:
             FlowMask.objects.update(mask=new_mask)
+        else:
+            FlowMask.objects.all().delete()
+            FlowMask.objects.create(mask=new_mask)
         cache.set(self.mask_key, bin(new_mask)[2:].zfill(7))
         return Response()
 
@@ -209,10 +213,15 @@ class AreaSamaraStageAPIView(APIView):
             count_of_records = AreaSamaraCurrentStage.objects.count()
             if count_of_records == 0:
                 AreaSamaraCurrentStage.objects.create(stage=request.data['stage'])
+                AreaSamaraAutoPlayAPIView.post(AreaSamaraAutoPlayAPIView, request, 0)
             elif count_of_records == 1:
                 AreaSamaraCurrentStage.objects.update(stage=request.data['stage'])
+                AreaSamaraAutoPlayAPIView.post(AreaSamaraAutoPlayAPIView, request, 0)
+            else:
+                AreaSamaraCurrentStage.objects.all().delete()
+                AreaSamaraCurrentStage.objects.create(stage=request.data['stage'])
+                AreaSamaraAutoPlayAPIView.post(AreaSamaraAutoPlayAPIView, request, 0)
             cache.set(self.stage_key, request.data['stage'])
-            # requests.get(controller_link)
             return Response()
         except DataBaseException:
             return Response(data="Unknown database error. Please, check tables and file models.py",
@@ -234,6 +243,42 @@ class AreaSamaraVideoAPIView(APIView):
 
             return Response({"current_video": f"{final_path}",
                              "video_duration": f"{duration}"})
+        except DataBaseException:
+            return Response(data="Unknown database error. Please, check tables and file models.py",
+                            status=500, exception=True)
+
+
+class AreaSamaraAutoPlayAPIView(APIView):
+    """AutoPlay condition"""
+    autoplay_key = 'area_samara_autoplay'
+
+    def get(self, request) -> Response:
+        # handles get-requests from the app, returns autoplay condition: 1 or 0
+        try:
+            current_condition = cache.get(self.autoplay_key)
+            if not current_condition:
+                autoplay_condition = AreaSamaraAutoPlay.objects.first()
+                cache.set(self.autoplay_key, autoplay_condition)
+                current_condition = autoplay_condition
+            return Response({"auto_play": f"{current_condition}"})
+        except DataBaseException:
+            return Response(data="Unknown database error. Please, check tables and file models.py",
+                            status=500, exception=True)
+
+    def post(self, request, condition) -> Response:
+        # handles post-request from the controllers or from server (after stage changing in AreaSamara),
+        # you should specify autoplay condition: 1 or 0
+        try:
+            count_of_records = AreaSamaraAutoPlay.objects.count()
+            if count_of_records == 0:
+                AreaSamaraAutoPlay.objects.create(auto_play=condition)
+            elif count_of_records == 1:
+                AreaSamaraAutoPlay.objects.update(auto_play=condition)
+            else:
+                AreaSamaraAutoPlay.objects.all().delete()
+                AreaSamaraAutoPlay.objects.create(auto_play=condition)
+            cache.set(self.autoplay_key, condition)
+            return Response()
         except DataBaseException:
             return Response(data="Unknown database error. Please, check tables and file models.py",
                             status=500, exception=True)
@@ -265,6 +310,9 @@ class TechnologiesStageAPIView(APIView):
                 TechnologiesCurrentStage.objects.create(stage=request.data['stage'])
             elif count_of_records == 1:
                 TechnologiesCurrentStage.objects.update(stage=request.data['stage'])
+            else:
+                TechnologiesCurrentStage.objects.all().delete()
+                TechnologiesCurrentStage.objects.create(stage=request.data['stage'])
             cache.set(self.stage_key, request.data['stage'])
             # request.get(controller_link)
             return Response()
@@ -320,6 +368,9 @@ class TechnologiesVideoLabelAPIView(APIView):
                 TechnologiesCurrentLabel.objects.create(label=request.data['label'])
             elif count_of_records == 1:
                 TechnologiesCurrentLabel.objects.update(label=request.data['label'])
+            else:
+                TechnologiesCurrentLabel.objects.all().delete()
+                TechnologiesCurrentLabel.objects.create(label=request.data['label'])
             cache.set(self.label_key, request.data['label'])
             return Response()
         except DataBaseException:

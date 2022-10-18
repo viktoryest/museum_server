@@ -17,7 +17,7 @@ from django.contrib import admin
 from django.urls import path, re_path
 from museum_srv.views import VideoStandPageAPIView, VideoStandEmployeeListAPIView, TimeLineYearAPIView, \
     TimeLineVideoAPIView, \
-    AreaSamaraStageAPIView, AreaSamaraVideoAPIView, TechnologiesStageAPIView, \
+    AreaSamaraStageAPIView, AreaSamaraVideoAPIView, AreaSamaraAutoPlayAPIView, TechnologiesStageAPIView, \
     TechnologiesVideoLabelAPIView, FlowMaskAPIView, VideoStandEmployeeAPIView, TechnologiesFourthAPIView, \
     TechnologiesMovingAndBackstageAPIView, EntryGroupVideoAPIView
 from django.conf import settings
@@ -25,7 +25,7 @@ from django.conf.urls.static import static
 from rest_framework import permissions
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
-from museum_srv.models import TimeLine, Technologies, AreaSamara
+from museum_srv.models import TimeLine, FlowMask, AreaSamara, AreaSamaraAutoPlay, Technologies, EntryGroupVideo
 
 schema_view = get_schema_view(
     openapi.Info(
@@ -50,6 +50,8 @@ urlpatterns = [
     path('api/timeline/<year>/<int:video_index>/', TimeLineVideoAPIView.as_view()),
     path('api/area_samara/stage/', AreaSamaraStageAPIView.as_view()),
     path('api/area_samara/<int:stage>/video/', AreaSamaraVideoAPIView.as_view()),
+    path('api/area_samara/auto_play/', AreaSamaraAutoPlayAPIView.as_view()),
+    path('api/area_samara/auto_play/<condition>/', AreaSamaraAutoPlayAPIView.as_view()),
     path('api/technologies/stage/', TechnologiesStageAPIView.as_view()),
     path('api/technologies/video_label/', TechnologiesVideoLabelAPIView.as_view()),
     path('api/technologies/fourth_video/<label>/', TechnologiesFourthAPIView.as_view()),
@@ -65,5 +67,8 @@ urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 TimeLine.check_timeline_videos()
-Technologies.check_technologies_stages()
+FlowMask.check_flows()
 AreaSamara.check_area_samara_stages()
+AreaSamaraAutoPlay.check_area_samara_auto_play()
+Technologies.check_technologies_stages()
+EntryGroupVideo.check_entry_group_video()
