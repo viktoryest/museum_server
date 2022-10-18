@@ -29,4 +29,4 @@ class MyModelAdmin(admin.ModelAdmin):
     def has_add_permission(self, request):
         return False
 
-    readonly_fields = ['video', 'video_duration']
+    readonly_fields = ['video_duration']
