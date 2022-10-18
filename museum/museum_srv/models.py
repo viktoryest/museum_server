@@ -88,20 +88,28 @@ class AreaSamara(models.Model):
     def save(self, *args, **kwargs):
         super(AreaSamara, self).save(*args, **kwargs)
         video = self.video
-        final_path = f'media/{video}'
-        clip = VideoFileClip(os.path.join(BASE_DIR, final_path))
-        video_duration = clip.duration
-        AreaSamara.objects.filter(stage=self.stage).update(video_duration=video_duration)
+        if video:
+            final_path = f'media/{video}'
+            clip = VideoFileClip(os.path.join(BASE_DIR, final_path))
+            video_duration = clip.duration
+            AreaSamara.objects.filter(stage=self.stage).update(video_duration=video_duration)
+
+    @classmethod
+    def check_area_samara_stages(cls):
+        list_of_stages = ['stage_1', 'stage_2', 'stage_3', 'stage_4']
+        for stage in list_of_stages:
+            if not cls.objects.filter(stage=stage):
+                cls.objects.create(stage=stage)
 
     def __str__(self):
         return self.stage
 
 
 class AreaSamaraCurrentStage(models.Model):
-    current_stage = models.CharField(max_length=10)
+    stage = models.CharField(max_length=10)
 
     def __str__(self):
-        return self.current_stage
+        return self.stage
 
 
 class Technologies(models.Model):
@@ -113,18 +121,26 @@ class Technologies(models.Model):
 
     def save(self, *args, **kwargs):
         super(Technologies, self).save(*args, **kwargs)
-
         backstage_video = self.backstage_video
-        back_final_path = f'media/{backstage_video}'
-        back_clip = VideoFileClip(os.path.join(BASE_DIR, back_final_path))
-        back_video_duration = back_clip.duration
-        Technologies.objects.filter(stage=self.stage).update(backstage_video_duration=back_video_duration)
+        if backstage_video:
+            back_final_path = f'media/{backstage_video}'
+            back_clip = VideoFileClip(os.path.join(BASE_DIR, back_final_path))
+            back_video_duration = back_clip.duration
+            Technologies.objects.filter(stage=self.stage).update(backstage_video_duration=back_video_duration)
 
         moving_video = self.moving_video
-        mov_final_path = f'media/{moving_video}'
-        mov_clip = VideoFileClip(os.path.join(BASE_DIR, mov_final_path))
-        mov_video_duration = mov_clip.duration
-        Technologies.objects.filter(stage=self.stage).update(moving_video_duration=mov_video_duration)
+        if moving_video:
+            mov_final_path = f'media/{moving_video}'
+            mov_clip = VideoFileClip(os.path.join(BASE_DIR, mov_final_path))
+            mov_video_duration = mov_clip.duration
+            Technologies.objects.filter(stage=self.stage).update(moving_video_duration=mov_video_duration)
+
+    @classmethod
+    def check_technologies_stages(cls):
+        list_of_stages = ['past', 'present_1', 'present_2', 'future']
+        for stage in list_of_stages:
+            if not cls.objects.filter(stage=stage):
+                cls.objects.create(stage=stage)
 
     def __str__(self):
         return self.stage
@@ -150,6 +166,9 @@ class TechnologiesFourth(models.Model):
         video_duration = clip.duration
         TechnologiesFourth.objects.filter(label=self.label).update(fourth_stage_video_duration=video_duration)
 
+    def __str__(self):
+        return self.label
+
 
 class TechnologiesCurrentLabel(models.Model):
     label = models.CharField(max_length=100)
@@ -169,3 +188,6 @@ class EntryGroupVideo(models.Model):
         clip = VideoFileClip(os.path.join(BASE_DIR, final_path))
         video_duration = clip.duration
         EntryGroupVideo.objects.filter(video=self.video).update(video_duration=video_duration)
+
+    def __str__(self):
+        return 'Entry Group Video'

@@ -226,7 +226,7 @@ class AreaSamaraVideoAPIView(APIView):
         # handles get-request from the app, returns video path and its duration,
         # you should specify the number of the stage: 1, 2, 3 or 4
         try:
-            video = AreaSamara.objects.filter(stage=stage).values('video', 'video_duration').first()
+            video = AreaSamara.objects.filter(stage=f'stage_{stage}').values('video', 'video_duration').first()
             video_path = video['video']
             final_path = f'/media/{video_path}'
 

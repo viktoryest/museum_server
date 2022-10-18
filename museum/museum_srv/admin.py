@@ -4,10 +4,6 @@ from .models import VideoStandEmployee, TimeLine, AreaSamara, Technologies, Flow
 
 admin.site.disable_action('delete_selected')
 admin.site.register(VideoStandEmployee)
-admin.site.register(AreaSamara)
-admin.site.register(Technologies)
-admin.site.register(TechnologiesFourth)
-admin.site.register(FlowMask)
 
 
 @admin.register(TimeLine)
@@ -19,6 +15,33 @@ class MyModelAdmin(admin.ModelAdmin):
         return False
 
     readonly_fields = ['year', 'video_1_duration', 'video_2_duration']
+
+
+@admin.register(AreaSamara)
+class MyModelAdmin(admin.ModelAdmin):
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+    def has_add_permission(self, request):
+        return False
+
+    readonly_fields = ['stage', 'video_duration']
+
+
+@admin.register(Technologies)
+class MyModelAdmin(admin.ModelAdmin):
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+    def has_add_permission(self, request):
+        return False
+
+    readonly_fields = ['stage', 'backstage_video_duration', 'moving_video_duration']
+
+
+@admin.register(TechnologiesFourth)
+class MyModelAdmin(admin.ModelAdmin):
+    readonly_fields = ['fourth_stage_video_duration']
 
 
 @admin.register(EntryGroupVideo)
