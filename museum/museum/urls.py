@@ -45,6 +45,7 @@ urlpatterns = [
     path('api/video_stand/', VideoStandPageAPIView.as_view()),
     path('api/video_stand/page/', VideoStandPageAPIView.as_view()),
     path('api/video_stand/employee_list/<group>/', VideoStandEmployeeListAPIView.as_view()),
+    path('api/video_stand/employee_list/', VideoStandEmployeeListAPIView.as_view()),
     path('api/video_stand/employee/', VideoStandEmployeeAPIView.as_view()),
     path('api/timeline/year/', TimeLineYearAPIView.as_view()),
     path('api/timeline/<year>/<int:video_index>/', TimeLineVideoAPIView.as_view()),
