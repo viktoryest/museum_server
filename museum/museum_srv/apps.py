@@ -20,4 +20,4 @@ class MuseumSrvConfig(AppConfig):
     name = 'museum_srv'
 
     def ready(self):
-        post_migrate.connect(create_default_site_profile, sender=self)
+        post_migrate.connect(create_default_tables, sender=self)
