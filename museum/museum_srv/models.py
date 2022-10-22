@@ -3,7 +3,7 @@ from model_utils import Choices
 from moviepy.editor import VideoFileClip
 import os
 from museum.settings import BASE_DIR
-from exceptions import *
+from django.core.validators import FileExtensionValidator
 
 
 class VideoStandPage(models.Model):
@@ -34,8 +34,10 @@ class VideoStandCurrentEmployee(models.Model):
 
 class TimeLine(models.Model):
     year = models.CharField(max_length=10)
-    video_1 = models.FileField(upload_to='static/timeline/video')
-    video_2 = models.FileField(upload_to='static/timeline/video')
+    video_1 = models.FileField(upload_to='static/timeline/video',
+                               validators=[FileExtensionValidator(allowed_extensions=["mp4"])])
+    video_2 = models.FileField(upload_to='static/timeline/video',
+                               validators=[FileExtensionValidator(allowed_extensions=["mp4"])])
     video_1_duration = models.CharField(max_length=100, blank=True)
     video_2_duration = models.CharField(max_length=100, blank=True)
 
@@ -44,16 +46,18 @@ class TimeLine(models.Model):
         video_1 = self.video_1
         if video_1:
             final_path_1 = f'media/{video_1}'
-            clip_1 = VideoFileClip(os.path.join(BASE_DIR, final_path_1))
-            video_1_duration = clip_1.duration
-            TimeLine.objects.filter(year=self.year).update(video_1_duration=video_1_duration)
+            if os.path.isfile(final_path_1):
+                clip_1 = VideoFileClip(os.path.join(BASE_DIR, final_path_1))
+                video_1_duration = clip_1.duration
+                TimeLine.objects.filter(year=self.year).update(video_1_duration=video_1_duration)
 
         video_2 = self.video_2
         if video_2:
             final_path_2 = f'media/{video_2}'
-            clip_2 = VideoFileClip(os.path.join(BASE_DIR, final_path_2))
-            video_2_duration = clip_2.duration
-            TimeLine.objects.filter(year=self.year).update(video_2_duration=video_2_duration)
+            if os.path.isfile(final_path_2):
+                clip_2 = VideoFileClip(os.path.join(BASE_DIR, final_path_2))
+                video_2_duration = clip_2.duration
+                TimeLine.objects.filter(year=self.year).update(video_2_duration=video_2_duration)
 
     @classmethod
     def check_timeline_videos(cls):
@@ -88,7 +92,8 @@ class FlowMask(models.Model):
 
 class AreaSamara(models.Model):
     stage = models.CharField(max_length=100)
-    video = models.FileField(upload_to='static/area_samara/video')
+    video = models.FileField(upload_to='static/area_samara/video',
+                             validators=[FileExtensionValidator(allowed_extensions=["mp4"])])
     video_duration = models.CharField(max_length=100, blank=True)
 
     def save(self, *args, **kwargs):
@@ -96,9 +101,10 @@ class AreaSamara(models.Model):
         video = self.video
         if video:
             final_path = f'media/{video}'
-            clip = VideoFileClip(os.path.join(BASE_DIR, final_path))
-            video_duration = clip.duration
-            AreaSamara.objects.filter(stage=self.stage).update(video_duration=video_duration)
+            if os.path.isfile(final_path):
+                clip = VideoFileClip(os.path.join(BASE_DIR, final_path))
+                video_duration = clip.duration
+                AreaSamara.objects.filter(stage=self.stage).update(video_duration=video_duration)
 
     @classmethod
     def check_area_samara_stages(cls):
@@ -133,9 +139,11 @@ class AreaSamaraAutoPlay(models.Model):
 
 class Technologies(models.Model):
     stage = models.CharField(max_length=100)
-    backstage_video = models.FileField(upload_to='static/technologies/video')
+    backstage_video = models.FileField(upload_to='static/technologies/video',
+                                       validators=[FileExtensionValidator(allowed_extensions=["mp4"])])
     backstage_video_duration = models.CharField(max_length=100, blank=True)
-    moving_video = models.FileField(upload_to='static/technologies/video')
+    moving_video = models.FileField(upload_to='static/technologies/video', blank=True,
+                                    validators=[FileExtensionValidator(allowed_extensions=["mp4"])])
     moving_video_duration = models.CharField(max_length=100, blank=True)
 
     def save(self, *args, **kwargs):
@@ -143,16 +151,18 @@ class Technologies(models.Model):
         backstage_video = self.backstage_video
         if backstage_video:
             back_final_path = f'media/{backstage_video}'
-            back_clip = VideoFileClip(os.path.join(BASE_DIR, back_final_path))
-            back_video_duration = back_clip.duration
-            Technologies.objects.filter(stage=self.stage).update(backstage_video_duration=back_video_duration)
+            if os.path.isfile(back_final_path):
+                back_clip = VideoFileClip(os.path.join(BASE_DIR, back_final_path))
+                back_video_duration = back_clip.duration
+                Technologies.objects.filter(stage=self.stage).update(backstage_video_duration=back_video_duration)
 
         moving_video = self.moving_video
         if moving_video:
             mov_final_path = f'media/{moving_video}'
-            mov_clip = VideoFileClip(os.path.join(BASE_DIR, mov_final_path))
-            mov_video_duration = mov_clip.duration
-            Technologies.objects.filter(stage=self.stage).update(moving_video_duration=mov_video_duration)
+            if os.path.isfile(mov_final_path):
+                mov_clip = VideoFileClip(os.path.join(BASE_DIR, mov_final_path))
+                mov_video_duration = mov_clip.duration
+                Technologies.objects.filter(stage=self.stage).update(moving_video_duration=mov_video_duration)
 
     @classmethod
     def check_technologies_stages(cls):
@@ -174,16 +184,19 @@ class TechnologiesCurrentStage(models.Model):
 
 class TechnologiesFourth(models.Model):
     label = models.CharField(max_length=100)
-    fourth_stage_video = models.FileField(upload_to='static/technologies/video')
+    fourth_stage_video = models.FileField(upload_to='static/technologies/video',
+                                          validators=[FileExtensionValidator(allowed_extensions=["mp4"])])
     fourth_stage_video_duration = models.CharField(max_length=100, blank=True)
 
     def save(self, *args, **kwargs):
         super(TechnologiesFourth, self).save(*args, **kwargs)
         fourth_stage_video = self.fourth_stage_video
-        final_path = f'media/{fourth_stage_video}'
-        clip = VideoFileClip(os.path.join(BASE_DIR, final_path))
-        video_duration = clip.duration
-        TechnologiesFourth.objects.filter(label=self.label).update(fourth_stage_video_duration=video_duration)
+        if fourth_stage_video:
+            final_path = f'media/{fourth_stage_video}'
+            if os.path.isfile(final_path):
+                clip = VideoFileClip(os.path.join(BASE_DIR, final_path))
+                video_duration = clip.duration
+                TechnologiesFourth.objects.filter(label=self.label).update(fourth_stage_video_duration=video_duration)
 
     def __str__(self):
         return self.label
@@ -197,7 +210,8 @@ class TechnologiesCurrentLabel(models.Model):
 
 
 class EntryGroupVideo(models.Model):
-    video = models.FileField(upload_to='static/entry_group/video')
+    video = models.FileField(upload_to='static/entry_group/video',
+                             validators=[FileExtensionValidator(allowed_extensions=["mp4"])])
     video_duration = models.CharField(max_length=100, blank=True)
 
     def save(self, *args, **kwargs):
@@ -205,9 +219,10 @@ class EntryGroupVideo(models.Model):
         video = self.video
         if video:
             final_path = f'media/{video}'
-            clip = VideoFileClip(os.path.join(BASE_DIR, final_path))
-            video_duration = clip.duration
-            EntryGroupVideo.objects.filter(video=self.video).update(video_duration=video_duration)
+            if os.path.isfile(final_path):
+                clip = VideoFileClip(os.path.join(BASE_DIR, final_path))
+                video_duration = clip.duration
+                EntryGroupVideo.objects.filter(video=self.video).update(video_duration=video_duration)
 
     @classmethod
     def check_entry_group_video(cls):
