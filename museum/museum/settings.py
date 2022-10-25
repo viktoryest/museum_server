@@ -26,19 +26,9 @@ DEBUG = True
 
 CORS_ORIGIN_ALLOW_ALL = True
 ALLOWED_HOSTS = [
-    '127.0.0.1',
-    '127.0.0.1:3000',
-    'localhost',
-    'localhost:3000',
+    '*'
 ]
 
-CORS_ALLOWED_ORIGINS = [
-    'http://127.0.0.1',
-    'http://127.0.0.1:3000',
-    'http://localhost',
-    'http://localhost:3000'
-]
-CORS_ALLOW_CREDENTIALS = False
 CORS_ALLOW_METHODS = ['DELETE', 'GET', 'OPTIONS', 'PATCH', 'POST', 'PUT']
 CORS_ALLOW_HEADERS = [
     'accept',
@@ -71,8 +61,9 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
+    # 'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'utils.DisableCSRF',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'corsheaders.middleware.CorsMiddleware',
