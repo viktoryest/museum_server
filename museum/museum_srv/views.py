@@ -163,19 +163,27 @@ class TimeLineVideoAPIView(APIView):
     """Video by selected year and necessary index (first or second - there are two videos for each of years)"""
 
     def get(self, request, year: [int, str], video_index: int) -> Response:
-        # handles get-requests from the second app, returns video path and its duration:
+        # handles get-requests from the second app, returns video path, intro video path and their durations:
         # you should specify one of the following years: 1936, 1953, 1961, 1970, 1980s, 1990s, 2000s, 2010s and
         # video index: 1 or 2
         try:
             video = TimeLine.objects.filter(year=year).values \
-                (f'video_{video_index}', f'video_{video_index}_duration').first()
+                (f'video_{video_index}', f'video_{video_index}_duration',
+                 f'intro_video_{video_index}', f'intro_video_{video_index}_duration').first()
+
             video_path = video[f'video_{video_index}']
             final_path = f'/media/{video_path}'
-
             duration = video[f'video_{video_index}_duration']
 
+            intro_video_path = video[f'intro_video_{video_index}']
+            final_intro_path = f'/media/{intro_video_path}'
+            intro_duration = video[f'intro_video_{video_index}_duration']
+
             return Response({"current_video": f"{final_path}",
-                             "video_duration": f"{duration}"})
+                             "video_duration": f"{duration}",
+                             "intro_video": f"{final_intro_path}",
+                             "intro_video_duration": f"{intro_duration}"
+                             })
         except DataBaseException:
             return Response(data="Unknown database error. Please, check tables and file models.py",
                             status=500, exception=True)
