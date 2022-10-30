@@ -36,10 +36,16 @@ class TimeLine(models.Model):
     year = models.CharField(max_length=10)
     video_1 = models.FileField(upload_to='static/timeline/video',
                                validators=[FileExtensionValidator(allowed_extensions=["mp4"])])
+    intro_video_1 = models.FileField(upload_to='static/timeline/video',
+                                     validators=[FileExtensionValidator(allowed_extensions=["mp4"])])
     video_2 = models.FileField(upload_to='static/timeline/video',
                                validators=[FileExtensionValidator(allowed_extensions=["mp4"])])
+    intro_video_2 = models.FileField(upload_to='static/timeline/video',
+                                     validators=[FileExtensionValidator(allowed_extensions=["mp4"])])
     video_1_duration = models.CharField(max_length=100, blank=True)
+    intro_video_1_duration = models.CharField(max_length=100, blank=True)
     video_2_duration = models.CharField(max_length=100, blank=True)
+    intro_video_2_duration = models.CharField(max_length=100, blank=True)
 
     def save(self, *args, **kwargs):
         super(TimeLine, self).save(*args, **kwargs)
@@ -51,6 +57,14 @@ class TimeLine(models.Model):
                 video_1_duration = clip_1.duration
                 TimeLine.objects.filter(year=self.year).update(video_1_duration=video_1_duration)
 
+        intro_video_1 = self.intro_video_1
+        if intro_video_1:
+            final_path_intro_1 = f'media/{intro_video_1}'
+            if os.path.isfile(final_path_intro_1):
+                clip_intro_1 = VideoFileClip(os.path.join(BASE_DIR, final_path_intro_1))
+                intro_video_1_duration = clip_intro_1.duration
+                TimeLine.objects.filter(year=self.year).update(intro_video_1_duration=intro_video_1_duration)
+
         video_2 = self.video_2
         if video_2:
             final_path_2 = f'media/{video_2}'
@@ -58,6 +72,14 @@ class TimeLine(models.Model):
                 clip_2 = VideoFileClip(os.path.join(BASE_DIR, final_path_2))
                 video_2_duration = clip_2.duration
                 TimeLine.objects.filter(year=self.year).update(video_2_duration=video_2_duration)
+
+        intro_video_2 = self.intro_video_2
+        if intro_video_2:
+            final_path_intro_2 = f'media/{intro_video_2}'
+            if os.path.isfile(final_path_intro_2):
+                clip_intro_2 = VideoFileClip(os.path.join(BASE_DIR, final_path_intro_2))
+                intro_video_2_duration = clip_intro_2.duration
+                TimeLine.objects.filter(year=self.year).update(intro_video_2_duration=intro_video_2_duration)
 
     @classmethod
     def check_timeline_videos(cls):
