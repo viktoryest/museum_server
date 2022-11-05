@@ -1,4 +1,6 @@
+from django.core.exceptions import ValidationError
 from django.db import models
+from django.db.models.fields.files import FieldFile
 from model_utils import Choices
 from moviepy.editor import VideoFileClip
 import os
@@ -33,15 +35,28 @@ class VideoStandCurrentEmployee(models.Model):
 
 
 class TimeLine(models.Model):
+    def check_file_existing(path: FieldFile):
+        complete_path = f'media/{str(path)}'
+        if path:
+            field_name = str(path.field).split('.')[-1]
+            local_path = os.path.join(BASE_DIR, complete_path)
+            current_field_value = TimeLine.objects.filter(year=path.instance.year).values(field_name) \
+                .first().values()
+            if path in current_field_value and not os.path.isfile(local_path):
+                path.delete()
+                raise ValidationError(f'Please, check video in {field_name}. Possibly, it was deleted manually')
+
     year = models.CharField(max_length=10)
     video_1 = models.FileField(upload_to='static/timeline/video',
-                               validators=[FileExtensionValidator(allowed_extensions=["mp4"])])
+                               validators=[FileExtensionValidator(allowed_extensions=["mp4"]), check_file_existing])
     intro_video_1 = models.FileField(upload_to='static/timeline/video',
-                                     validators=[FileExtensionValidator(allowed_extensions=["mp4"])])
+                                     validators=[FileExtensionValidator(allowed_extensions=["mp4"]),
+                                                 check_file_existing])
     video_2 = models.FileField(upload_to='static/timeline/video',
-                               validators=[FileExtensionValidator(allowed_extensions=["mp4"])])
+                               validators=[FileExtensionValidator(allowed_extensions=["mp4"]), check_file_existing])
     intro_video_2 = models.FileField(upload_to='static/timeline/video',
-                                     validators=[FileExtensionValidator(allowed_extensions=["mp4"])])
+                                     validators=[FileExtensionValidator(allowed_extensions=["mp4"]),
+                                                 check_file_existing])
     video_1_duration = models.CharField(max_length=100, blank=True)
     intro_video_1_duration = models.CharField(max_length=100, blank=True)
     video_2_duration = models.CharField(max_length=100, blank=True)
