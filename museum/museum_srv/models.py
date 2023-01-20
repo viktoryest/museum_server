@@ -1,4 +1,6 @@
+from django.core.exceptions import ValidationError
 from django.db import models
+from django.db.models.fields.files import FieldFile
 from model_utils import Choices
 from moviepy.editor import VideoFileClip
 import os
@@ -33,15 +35,28 @@ class VideoStandCurrentEmployee(models.Model):
 
 
 class TimeLine(models.Model):
+    def check_file_existence(path: FieldFile):
+        complete_path = f'media/{str(path)}'
+        if path:
+            field_name = str(path.field).split('.')[-1]
+            local_path = os.path.join(BASE_DIR, complete_path)
+            current_field_value = TimeLine.objects.filter(year=path.instance.year).values(field_name) \
+                .first().values()
+            if path in current_field_value and not os.path.isfile(local_path):
+                path.delete()
+                raise ValidationError(f'Please, check video in {field_name}. Possibly, it was deleted manually')
+
     year = models.CharField(max_length=10)
     video_1 = models.FileField(upload_to='static/timeline/video',
-                               validators=[FileExtensionValidator(allowed_extensions=["mp4"])])
+                               validators=[FileExtensionValidator(allowed_extensions=["mp4"]), check_file_existence])
     intro_video_1 = models.FileField(upload_to='static/timeline/video',
-                                     validators=[FileExtensionValidator(allowed_extensions=["mp4"])])
+                                     validators=[FileExtensionValidator(allowed_extensions=["mp4"]),
+                                                 check_file_existence])
     video_2 = models.FileField(upload_to='static/timeline/video',
-                               validators=[FileExtensionValidator(allowed_extensions=["mp4"])])
+                               validators=[FileExtensionValidator(allowed_extensions=["mp4"]), check_file_existence])
     intro_video_2 = models.FileField(upload_to='static/timeline/video',
-                                     validators=[FileExtensionValidator(allowed_extensions=["mp4"])])
+                                     validators=[FileExtensionValidator(allowed_extensions=["mp4"]),
+                                                 check_file_existence])
     video_1_duration = models.CharField(max_length=100, blank=True)
     intro_video_1_duration = models.CharField(max_length=100, blank=True)
     video_2_duration = models.CharField(max_length=100, blank=True)
@@ -113,9 +128,20 @@ class FlowMask(models.Model):
 
 
 class AreaSamara(models.Model):
+    def check_file_existence(path: FieldFile):
+        complete_path = f'media/{str(path)}'
+        if path:
+            field_name = str(path.field).split('.')[-1]
+            local_path = os.path.join(BASE_DIR, complete_path)
+            current_field_value = AreaSamara.objects.filter(stage=path.instance.stage).values(field_name) \
+                .first().values()
+            if path in current_field_value and not os.path.isfile(local_path):
+                path.delete()
+                raise ValidationError(f'Please, check video in {field_name}. Possibly, it was deleted manually')
+
     stage = models.CharField(max_length=100)
     video = models.FileField(upload_to='static/area_samara/video',
-                             validators=[FileExtensionValidator(allowed_extensions=["mp4"])])
+                             validators=[FileExtensionValidator(allowed_extensions=["mp4"]), check_file_existence])
     video_duration = models.CharField(max_length=100, blank=True)
 
     def save(self, *args, **kwargs):
@@ -160,12 +186,25 @@ class AreaSamaraAutoPlay(models.Model):
 
 
 class Technologies(models.Model):
+    def check_file_existence(path: FieldFile):
+        complete_path = f'media/{str(path)}'
+        if path:
+            field_name = str(path.field).split('.')[-1]
+            local_path = os.path.join(BASE_DIR, complete_path)
+            current_field_value = Technologies.objects.filter(stage=path.instance.stage).values(field_name) \
+                .first().values()
+            if path in current_field_value and not os.path.isfile(local_path):
+                path.delete()
+                raise ValidationError(f'Please, check video in {field_name}. Possibly, it was deleted manually')
+
     stage = models.CharField(max_length=100)
     backstage_video = models.FileField(upload_to='static/technologies/video',
-                                       validators=[FileExtensionValidator(allowed_extensions=["mp4"])])
+                                       validators=[FileExtensionValidator(allowed_extensions=["mp4"]),
+                                                   check_file_existence])
     backstage_video_duration = models.CharField(max_length=100, blank=True)
     moving_video = models.FileField(upload_to='static/technologies/video', blank=True,
-                                    validators=[FileExtensionValidator(allowed_extensions=["mp4"])])
+                                    validators=[FileExtensionValidator(allowed_extensions=["mp4"]),
+                                                check_file_existence])
     moving_video_duration = models.CharField(max_length=100, blank=True)
 
     def save(self, *args, **kwargs):
@@ -205,9 +244,21 @@ class TechnologiesCurrentStage(models.Model):
 
 
 class TechnologiesFourth(models.Model):
+    def check_file_existence(path: FieldFile):
+        complete_path = f'media/{str(path)}'
+        if path:
+            field_name = str(path.field).split('.')[-1]
+            local_path = os.path.join(BASE_DIR, complete_path)
+            current_field_value = TechnologiesFourth.objects.filter(label=path.instance.label).values(field_name) \
+                .first().values()
+            if path in current_field_value and not os.path.isfile(local_path):
+                path.delete()
+                raise ValidationError(f'Please, check video in {field_name}. Possibly, it was deleted manually')
+
     label = models.CharField(max_length=100)
     fourth_stage_video = models.FileField(upload_to='static/technologies/video',
-                                          validators=[FileExtensionValidator(allowed_extensions=["mp4"])])
+                                          validators=[FileExtensionValidator(allowed_extensions=["mp4"]),
+                                                      check_file_existence])
     fourth_stage_video_duration = models.CharField(max_length=100, blank=True)
 
     def save(self, *args, **kwargs):
@@ -232,8 +283,19 @@ class TechnologiesCurrentLabel(models.Model):
 
 
 class EntryGroupVideo(models.Model):
+    def check_file_existence(path: FieldFile):
+        complete_path = f'media/{str(path)}'
+        if path:
+            field_name = str(path.field).split('.')[-1]
+            local_path = os.path.join(BASE_DIR, complete_path)
+            current_field_value = EntryGroupVideo.objects.all().values(field_name) \
+                .first().values()
+            if path in current_field_value and not os.path.isfile(local_path):
+                path.delete()
+                raise ValidationError(f'Please, check video in {field_name}. Possibly, it was deleted manually')
+
     video = models.FileField(upload_to='static/entry_group/video',
-                             validators=[FileExtensionValidator(allowed_extensions=["mp4"])])
+                             validators=[FileExtensionValidator(allowed_extensions=["mp4"]), check_file_existence])
     video_duration = models.CharField(max_length=100, blank=True)
 
     def save(self, *args, **kwargs):
