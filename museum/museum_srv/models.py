@@ -34,6 +34,30 @@ class VideoStandCurrentEmployee(models.Model):
         return self.current_employee
 
 
+class VideoStandWaitingMode(models.Model):
+    record_name_mode = models.BooleanField()
+
+    def __str__(self):
+        return self.record_name_mode
+
+
+class VideoStandWaitingVideo(models.Model):
+    def check_file_existence(path: FieldFile):
+        complete_path = f'media/{str(path)}'
+        if path:
+            field_name = str(path.field).split('.')[-1]
+            local_path = os.path.join(BASE_DIR, complete_path)
+            current_field_value = VideoStandWaitingVideo.objects.filter(record_name_video=path.instance.year) \
+                .values(field_name).first().values()
+            if path in current_field_value and not os.path.isfile(local_path):
+                path.delete()
+                raise ValidationError(f'Please, check video in {field_name}. Possibly, it was deleted manually')
+
+    record_name_video = models.FileField(upload_to='static/video_stand/video',
+                                         validators=[FileExtensionValidator(allowed_extensions=["mp4"]),
+                                                     check_file_existence])
+
+
 class TimeLine(models.Model):
     def check_file_existence(path: FieldFile):
         complete_path = f'media/{str(path)}'

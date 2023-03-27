@@ -15,7 +15,8 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, re_path
-from museum_srv.views import VideoStandPageAPIView, VideoStandEmployeeListAPIView, TimeLineYearAPIView, \
+from museum_srv.views import VideoStandPageAPIView, VideoStandEmployeeListAPIView, VideoStandWaitingModeAPIView,\
+    VideoStandWaitingVideoAPIView, TimeLineYearAPIView, \
     TimeLineVideoAPIView, \
     AreaSamaraStageAPIView, AreaSamaraVideoAPIView, AreaSamaraAutoPlayAPIView, TechnologiesStageAPIView, \
     TechnologiesVideoLabelAPIView, FlowMaskAPIView, VideoStandEmployeeAPIView, TechnologiesFourthAPIView, \
@@ -47,6 +48,9 @@ urlpatterns = [
     path('api/video_stand/employee_list/<group>/', VideoStandEmployeeListAPIView.as_view()),
     path('api/video_stand/employee_list/', VideoStandEmployeeListAPIView.as_view()),
     path('api/video_stand/employee/', VideoStandEmployeeAPIView.as_view()),
+    path('api/video_stand/<record_name>/mode/', VideoStandWaitingModeAPIView.as_view()),
+    path('api/video_stand/mode/<record_name>/<mode>/', VideoStandWaitingModeAPIView.as_view()),
+    path('api/video_stand/waiting_mode_video/<record_name>/', VideoStandWaitingVideoAPIView.as_view()),
     path('api/timeline/year/', TimeLineYearAPIView.as_view()),
     path('api/timeline/<year>/<int:video_index>/', TimeLineVideoAPIView.as_view()),
     path('api/area_samara/stage/', AreaSamaraStageAPIView.as_view()),

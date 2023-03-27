@@ -1,8 +1,8 @@
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from .models import VideoStandPage, VideoStandEmployee, VideoStandCurrentEmployee, TimeLine, TimeLineCurrentYear, \
-    FlowMask, AreaSamara, AreaSamaraCurrentStage, Technologies, TechnologiesCurrentStage, TechnologiesFourth, \
-    TechnologiesCurrentLabel, EntryGroupVideo, AreaSamaraAutoPlay
+from .models import VideoStandPage, VideoStandEmployee, VideoStandCurrentEmployee, VideoStandWaitingMode, TimeLine, \
+    VideoStandWaitingVideo, TimeLineCurrentYear, FlowMask, AreaSamara, AreaSamaraCurrentStage, Technologies, \
+    TechnologiesCurrentStage, TechnologiesFourth, TechnologiesCurrentLabel, EntryGroupVideo, AreaSamaraAutoPlay
 from django.core.cache import cache
 from exceptions import *
 
@@ -118,6 +118,58 @@ class VideoStandEmployeeAPIView(APIView):
                 VideoStandCurrentEmployee.objects.create(current_employee=request.data['current_employee'])
             cache.set(self.employee_key, request.data['current_employee'])
             return Response()
+        except DataBaseException:
+            return Response(data="Unknown database error. Please, check tables and file models.py",
+                            status=500, exception=True)
+
+
+class VideoStandWaitingModeAPIView(APIView):
+    video_stand_record_name_mode_key = 'video_stand_record_name_mode'
+
+    """Selected mode in Video Stand by record name"""
+    def get(self, request, record_name) -> Response:
+        # handles get-request from the app, returns selected mode of the record name
+        # attention: if mode hasn't been selected, will be returned None, it's a test method!
+        try:
+            current_mode = cache.get(self.video_stand_record_name_mode_key)
+            if not current_mode:
+                mode = VideoStandWaitingMode.objects.filter(record_name_mode=record_name).values('record_name_mode')
+                cache.set(self.video_stand_record_name_mode_key, mode)
+                current_mode = mode
+            return Response({"record_name_mode": f"{current_mode}"})
+        except DataBaseException:
+            return Response(data="Unknown database error. Please, check tables and file models.py",
+                            status=500, exception=True)
+
+    def post(self, request, record_name, mode) -> Response:
+        # handles post-request from the tablet, sets selected mode, it's a test method!
+        try:
+            count_of_records = VideoStandWaitingMode.objects.count()
+            if count_of_records == 0:
+                VideoStandWaitingMode.objects.create(record_name_mode=mode)
+            elif count_of_records == 1:
+                VideoStandWaitingMode.objects.update(record_name_mode=mode)
+            else:
+                VideoStandWaitingMode.objects.all().delete()
+                VideoStandWaitingMode.objects.create(record_name_mode=mode)
+            cache.set(self.video_stand_record_name_mode_key, mode)
+            return Response()
+        except DataBaseException:
+            return Response(data="Unknown database error. Please, check tables and file models.py",
+                            status=500, exception=True)
+
+
+class VideoStandWaitingVideoAPIView(APIView):
+    """Video in Video Stand"""
+    def get(self, request, record_name: str) -> Response:
+        # handles get-request from the app, returns video path, it's a test method!
+        try:
+            video = VideoStandWaitingVideo.objects.filter(record_name_video=record_name)\
+                .values('record_name_video').first()
+            video_path = video
+            final_path = f'/media/{video_path}'
+
+            return Response({"current_video": f"{final_path}"})
         except DataBaseException:
             return Response(data="Unknown database error. Please, check tables and file models.py",
                             status=500, exception=True)
