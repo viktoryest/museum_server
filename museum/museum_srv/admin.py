@@ -1,6 +1,6 @@
 from django.contrib import admin
 from .models import VideoStandEmployee, TimeLine, AreaSamara, Technologies, TechnologiesFourth, \
-    EntryGroupVideo
+    EntryGroupVideo, Idle
 
 admin.site.disable_action('delete_selected')
 admin.site.register(VideoStandEmployee)
@@ -54,3 +54,14 @@ class MyModelAdmin(admin.ModelAdmin):
         return False
 
     readonly_fields = ['video_duration']
+
+
+@admin.register(Idle)
+class MyModelAdmin(admin.ModelAdmin):
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+    def has_add_permission(self, request):
+        return False
+
+    readonly_fields = ['app', 'state', 'video_duration']

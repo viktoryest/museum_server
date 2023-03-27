@@ -15,12 +15,10 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, re_path
-from museum_srv.views import VideoStandPageAPIView, VideoStandEmployeeListAPIView, VideoStandWaitingModeAPIView,\
-    VideoStandWaitingVideoAPIView, TimeLineYearAPIView, \
-    TimeLineVideoAPIView, \
-    AreaSamaraStageAPIView, AreaSamaraVideoAPIView, AreaSamaraAutoPlayAPIView, TechnologiesStageAPIView, \
-    TechnologiesVideoLabelAPIView, FlowMaskAPIView, VideoStandEmployeeAPIView, TechnologiesFourthAPIView, \
-    TechnologiesMovingAndBackstageAPIView, EntryGroupVideoAPIView
+from museum_srv.views import VideoStandPageAPIView, VideoStandEmployeeListAPIView, TimeLineYearAPIView, \
+    TimeLineVideoAPIView, AreaSamaraStageAPIView, AreaSamaraVideoAPIView, AreaSamaraAutoPlayAPIView, \
+    TechnologiesStageAPIView, TechnologiesVideoLabelAPIView, FlowMaskAPIView, VideoStandEmployeeAPIView, \
+    TechnologiesFourthAPIView, TechnologiesMovingAndBackstageAPIView, EntryGroupVideoAPIView, IdleAPIView
 from django.conf import settings
 from django.conf.urls.static import static
 from rest_framework import permissions
@@ -48,9 +46,6 @@ urlpatterns = [
     path('api/video_stand/employee_list/<group>/', VideoStandEmployeeListAPIView.as_view()),
     path('api/video_stand/employee_list/', VideoStandEmployeeListAPIView.as_view()),
     path('api/video_stand/employee/', VideoStandEmployeeAPIView.as_view()),
-    path('api/video_stand/<record_name>/mode/', VideoStandWaitingModeAPIView.as_view()),
-    path('api/video_stand/mode/<record_name>/<mode>/', VideoStandWaitingModeAPIView.as_view()),
-    path('api/video_stand/waiting_mode_video/<record_name>/', VideoStandWaitingVideoAPIView.as_view()),
     path('api/timeline/year/', TimeLineYearAPIView.as_view()),
     path('api/timeline/<year>/<int:video_index>/', TimeLineVideoAPIView.as_view()),
     path('api/area_samara/stage/', AreaSamaraStageAPIView.as_view()),
@@ -63,6 +58,8 @@ urlpatterns = [
     path('api/technologies/<video_type>/<stage>/', TechnologiesMovingAndBackstageAPIView.as_view()),
     path('api/flows/', FlowMaskAPIView.as_view()),
     path('api/entry_group/video/', EntryGroupVideoAPIView.as_view()),
+    path('api/idle/<app>/<int:state>/', IdleAPIView.as_view()),
+    path('api/idle/<app>/<field>/', IdleAPIView.as_view()),
     re_path(r'^swagger(?P<format>\.json|\.yaml)$', schema_view.without_ui(cache_timeout=0), name='schema-json'),
     re_path(r'^swagger/$', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
     re_path(r'^redoc/$', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),

@@ -1,8 +1,8 @@
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from .models import VideoStandPage, VideoStandEmployee, VideoStandCurrentEmployee, VideoStandWaitingMode, TimeLine, \
-    VideoStandWaitingVideo, TimeLineCurrentYear, FlowMask, AreaSamara, AreaSamaraCurrentStage, Technologies, \
-    TechnologiesCurrentStage, TechnologiesFourth, TechnologiesCurrentLabel, EntryGroupVideo, AreaSamaraAutoPlay
+from .models import VideoStandPage, VideoStandEmployee, VideoStandCurrentEmployee, TimeLine, \
+    TimeLineCurrentYear, FlowMask, AreaSamara, AreaSamaraCurrentStage, Technologies, TechnologiesCurrentStage, \
+    TechnologiesFourth, TechnologiesCurrentLabel, EntryGroupVideo, AreaSamaraAutoPlay, Idle
 from django.core.cache import cache
 from exceptions import *
 
@@ -118,58 +118,6 @@ class VideoStandEmployeeAPIView(APIView):
                 VideoStandCurrentEmployee.objects.create(current_employee=request.data['current_employee'])
             cache.set(self.employee_key, request.data['current_employee'])
             return Response()
-        except DataBaseException:
-            return Response(data="Unknown database error. Please, check tables and file models.py",
-                            status=500, exception=True)
-
-
-class VideoStandWaitingModeAPIView(APIView):
-    video_stand_record_name_mode_key = 'video_stand_record_name_mode'
-
-    """Selected mode in Video Stand by record name"""
-    def get(self, request, record_name) -> Response:
-        # handles get-request from the app, returns selected mode of the record name
-        # attention: if mode hasn't been selected, will be returned None, it's a test method!
-        try:
-            current_mode = cache.get(self.video_stand_record_name_mode_key)
-            if not current_mode:
-                mode = VideoStandWaitingMode.objects.filter(record_name_mode=record_name).values('record_name_mode')
-                cache.set(self.video_stand_record_name_mode_key, mode)
-                current_mode = mode
-            return Response({"record_name_mode": f"{current_mode}"})
-        except DataBaseException:
-            return Response(data="Unknown database error. Please, check tables and file models.py",
-                            status=500, exception=True)
-
-    def post(self, request, record_name, mode) -> Response:
-        # handles post-request from the tablet, sets selected mode, it's a test method!
-        try:
-            count_of_records = VideoStandWaitingMode.objects.count()
-            if count_of_records == 0:
-                VideoStandWaitingMode.objects.create(record_name_mode=mode)
-            elif count_of_records == 1:
-                VideoStandWaitingMode.objects.update(record_name_mode=mode)
-            else:
-                VideoStandWaitingMode.objects.all().delete()
-                VideoStandWaitingMode.objects.create(record_name_mode=mode)
-            cache.set(self.video_stand_record_name_mode_key, mode)
-            return Response()
-        except DataBaseException:
-            return Response(data="Unknown database error. Please, check tables and file models.py",
-                            status=500, exception=True)
-
-
-class VideoStandWaitingVideoAPIView(APIView):
-    """Video in Video Stand"""
-    def get(self, request, record_name: str) -> Response:
-        # handles get-request from the app, returns video path, it's a test method!
-        try:
-            video = VideoStandWaitingVideo.objects.filter(record_name_video=record_name)\
-                .values('record_name_video').first()
-            video_path = video
-            final_path = f'/media/{video_path}'
-
-            return Response({"current_video": f"{final_path}"})
         except DataBaseException:
             return Response(data="Unknown database error. Please, check tables and file models.py",
                             status=500, exception=True)
@@ -502,3 +450,54 @@ class EntryGroupVideoAPIView(APIView):
         except DataBaseException:
             return Response(data="Unknown database error. Please, check tables and file models.py",
                             status=500, exception=True)
+
+
+class IdleAPIView(APIView):
+    """State, video and video duration for each app"""
+    state_key = 'state_key'
+
+    def get(self, request, app, field) -> Response:
+        # handles get-request from the app, returns state or video and video duration (depends on param 'field'),
+        # attention: it's necessary to define app name (param 'app') and field ('video' or 'state')!
+        if field == 'state':
+            try:
+                current_state = cache.get(self.state_key)
+                if not current_state:
+                    state = Idle.objects.filter(app=app).values('state').first()['state']
+                    cache.set(self.state_key, state)
+                    current_state = state
+                return Response({"state": f"{current_state}"})
+            except DataBaseException:
+                return Response(data="Unknown database error. Please, check tables and file models.py",
+                                status=500, exception=True)
+        if field == 'video':
+            try:
+                video = Idle.objects.filter(app=app).values('video', 'video_duration').first()
+                video_path = video['video']
+                final_path = f'/media/{video_path}'
+
+                duration = video[f'video_duration']
+
+                return Response({"current_video": f"{final_path}",
+                                 "video_duration": f"{duration}"})
+            except DataBaseException:
+                return Response(data="Unknown database error. Please, check tables and file models.py",
+                                status=500, exception=True)
+
+    def post(self, request, app, state) -> Response:
+        # handles post-request from the tablet, sets idle for the app
+        try:
+            count_of_records = Idle.objects.filter(app=app).count()
+            if count_of_records == 0:
+                Idle.objects.create(app=app, state=state)
+            elif count_of_records == 1:
+                Idle.objects.filter(app=app).update(app=app, state=state)
+            else:
+                Idle.objects.filter(app=app).delete()
+                Idle.objects.create(app=app, state=state)
+            cache.set(self.state_key, state)
+            return Response()
+        except DataBaseException:
+            return Response(data="Unknown database error. Please, check tables and file models.py",
+                            status=500, exception=True)
+

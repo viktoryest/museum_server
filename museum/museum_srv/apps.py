@@ -1,11 +1,13 @@
 from django.apps import AppConfig
 from django.conf import settings
-from django.db.models.signals import post_migrate
+from django.core.signals import setting_changed, request_finished
+from django.db.models.signals import post_migrate, post_init
 
 
 def create_default_tables(sender, **kwargs):
     """Creates tables with default values after migrations"""
-    from museum_srv.models import TimeLine, FlowMask, AreaSamara, AreaSamaraAutoPlay, Technologies, EntryGroupVideo
+    from museum_srv.models import TimeLine, FlowMask, AreaSamara, AreaSamaraAutoPlay, Technologies, EntryGroupVideo, \
+        Idle
 
     TimeLine.check_timeline_videos()
     FlowMask.check_flows()
@@ -13,6 +15,7 @@ def create_default_tables(sender, **kwargs):
     AreaSamaraAutoPlay.check_area_samara_auto_play()
     Technologies.check_technologies_stages()
     EntryGroupVideo.check_entry_group_video()
+    Idle.check_idle_videos()
 
 
 class MuseumSrvConfig(AppConfig):
