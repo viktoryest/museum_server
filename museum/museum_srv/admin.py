@@ -16,6 +16,7 @@ class MyModelAdmin(admin.ModelAdmin):
 
     readonly_fields = ['year', 'video_1_duration', 'video_2_duration', 'intro_video_1_duration',
                        'intro_video_2_duration']
+    exclude = ['video_2', 'intro_video_1', 'intro_video_2']
 
 
 @admin.register(AreaSamara)
