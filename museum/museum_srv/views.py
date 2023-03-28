@@ -466,7 +466,7 @@ class IdleAPIView(APIView):
                     state = Idle.objects.filter(app=app).values('state').first()['state']
                     cache.set(self.state_key, state)
                     current_state = state
-                return Response({"state": f"{current_state}"})
+                return Response({"state": current_state})
             except DataBaseException:
                 return Response(data="Unknown database error. Please, check tables and file models.py",
                                 status=500, exception=True)
@@ -484,18 +484,19 @@ class IdleAPIView(APIView):
                 return Response(data="Unknown database error. Please, check tables and file models.py",
                                 status=500, exception=True)
 
-    def post(self, request, app, state) -> Response:
+    def post(self, request, app) -> Response:
         # handles post-request from the tablet, sets idle for the app
+        data = request.data['state']
         try:
             count_of_records = Idle.objects.filter(app=app).count()
             if count_of_records == 0:
-                Idle.objects.create(app=app, state=state)
+                Idle.objects.create(app=app, state=data)
             elif count_of_records == 1:
-                Idle.objects.filter(app=app).update(app=app, state=state)
+                Idle.objects.filter(app=app).update(app=app, state=data)
             else:
                 Idle.objects.filter(app=app).delete()
-                Idle.objects.create(app=app, state=state)
-            cache.set(self.state_key, state)
+                Idle.objects.create(app=app, state=data)
+            cache.set(self.state_key, data)
             return Response()
         except DataBaseException:
             return Response(data="Unknown database error. Please, check tables and file models.py",

@@ -58,7 +58,7 @@ urlpatterns = [
     path('api/technologies/<video_type>/<stage>/', TechnologiesMovingAndBackstageAPIView.as_view()),
     path('api/flows/', FlowMaskAPIView.as_view()),
     path('api/entry_group/video/', EntryGroupVideoAPIView.as_view()),
-    path('api/idle/<app>/<int:state>/', IdleAPIView.as_view()),
+    path('api/idle/<app>/', IdleAPIView.as_view()),
     path('api/idle/<app>/<field>/', IdleAPIView.as_view()),
     re_path(r'^swagger(?P<format>\.json|\.yaml)$', schema_view.without_ui(cache_timeout=0), name='schema-json'),
     re_path(r'^swagger/$', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
