@@ -32,14 +32,15 @@ class VideoStandPageAPIView(APIView):
         # handles post-requests from the tablet, sets selected page (chapter)
         try:
             count_of_records = VideoStandPage.objects.count()
+            page = request.data['page']
             if count_of_records == 0:
-                VideoStandPage.objects.create(page=request.data['page'])
+                VideoStandPage.objects.create(page=page)
             elif count_of_records == 1:
-                VideoStandPage.objects.update(page=request.data['page'])
+                VideoStandPage.objects.update(page=page)
             else:
                 VideoStandPage.objects.all().delete()
-                VideoStandPage.objects.create(page=request.data['page'])
-            cache.set(self.page_key, request.data['page'])
+                VideoStandPage.objects.create(page=page)
+            cache.set(self.page_key, page)
             return Response()
         except DataBaseException:
             return Response(data="Unknown database error. Please, check tables and file models.py",
@@ -109,14 +110,15 @@ class VideoStandEmployeeAPIView(APIView):
         # handles post-request from the tablet, sets selected employee
         try:
             count_of_records = VideoStandCurrentEmployee.objects.count()
+            current_employee = request.data['current_employee']
             if count_of_records == 0:
-                VideoStandCurrentEmployee.objects.create(current_employee=request.data['current_employee'])
+                VideoStandCurrentEmployee.objects.create(current_employee=current_employee)
             elif count_of_records == 1:
-                VideoStandCurrentEmployee.objects.update(current_employee=request.data['current_employee'])
+                VideoStandCurrentEmployee.objects.update(current_employee=current_employee)
             else:
                 VideoStandCurrentEmployee.objects.all().delete()
-                VideoStandCurrentEmployee.objects.create(current_employee=request.data['current_employee'])
-            cache.set(self.employee_key, request.data['current_employee'])
+                VideoStandCurrentEmployee.objects.create(current_employee=current_employee)
+            cache.set(self.employee_key, current_employee)
             return Response()
         except DataBaseException:
             return Response(data="Unknown database error. Please, check tables and file models.py",
@@ -145,14 +147,15 @@ class TimeLineYearAPIView(APIView):
         # handles post-requests from the first app, sets selected year
         try:
             count_of_records = TimeLineCurrentYear.objects.count()
+            current_year = request.data['year']
             if count_of_records == 0:
-                TimeLineCurrentYear.objects.create(current_year=request.data['year'])
+                TimeLineCurrentYear.objects.create(current_year=current_year)
             elif count_of_records == 1:
-                TimeLineCurrentYear.objects.update(current_year=request.data['year'])
+                TimeLineCurrentYear.objects.update(current_year=current_year)
             else:
                 TimeLineCurrentYear.objects.all().delete()
-                TimeLineCurrentYear.objects.create(current_year=request.data['year'])
-            cache.set(self.year_key, request.data['year'])
+                TimeLineCurrentYear.objects.create(current_year=current_year)
+            cache.set(self.year_key, current_year)
             return Response()
         except DataBaseException:
             return Response(data="Unknown database error. Please, check tables and file models.py",
@@ -207,9 +210,10 @@ class FlowMaskAPIView(APIView):
         mask = int(str(FlowMask.objects.first()))
         position = int(request.data['flow']) - 1
         new_mask = None
-        if request.data['condition'] and type(request.data['condition']) == bool:
+        condition = request.data['condition']
+        if condition and type(condition) == bool:
             new_mask = mask | (1 << position)
-        elif not request.data['condition'] and type(request.data['condition']) == bool:
+        elif not condition and type(condition) == bool:
             new_mask = mask & ~(1 << position)
         count_of_records = FlowMask.objects.count()
         if count_of_records == 0:
@@ -244,17 +248,18 @@ class AreaSamaraStageAPIView(APIView):
         # handles post-requests from the tablet, sets selected stage
         try:
             count_of_records = AreaSamaraCurrentStage.objects.count()
+            stage = request.data['stage']
             if count_of_records == 0:
-                AreaSamaraCurrentStage.objects.create(stage=request.data['stage'])
+                AreaSamaraCurrentStage.objects.create(stage=stage)
                 AreaSamaraAutoPlayAPIView.post(AreaSamaraAutoPlayAPIView, request, 0)
             elif count_of_records == 1:
-                AreaSamaraCurrentStage.objects.update(stage=request.data['stage'])
+                AreaSamaraCurrentStage.objects.update(stage=stage)
                 AreaSamaraAutoPlayAPIView.post(AreaSamaraAutoPlayAPIView, request, 0)
             else:
                 AreaSamaraCurrentStage.objects.all().delete()
-                AreaSamaraCurrentStage.objects.create(stage=request.data['stage'])
+                AreaSamaraCurrentStage.objects.create(stage=stage)
                 AreaSamaraAutoPlayAPIView.post(AreaSamaraAutoPlayAPIView, request, 0)
-            cache.set(self.stage_key, request.data['stage'])
+            cache.set(self.stage_key, stage)
             return Response()
         except DataBaseException:
             return Response(data="Unknown database error. Please, check tables and file models.py",
@@ -339,14 +344,15 @@ class TechnologiesStageAPIView(APIView):
         # handles post-requests from the tablet, sets selected stage
         try:
             count_of_records = TechnologiesCurrentStage.objects.count()
+            stage = request.data['stage']
             if count_of_records == 0:
-                TechnologiesCurrentStage.objects.create(stage=request.data['stage'])
+                TechnologiesCurrentStage.objects.create(stage=stage)
             elif count_of_records == 1:
-                TechnologiesCurrentStage.objects.update(stage=request.data['stage'])
+                TechnologiesCurrentStage.objects.update(stage=stage)
             else:
                 TechnologiesCurrentStage.objects.all().delete()
-                TechnologiesCurrentStage.objects.create(stage=request.data['stage'])
-            cache.set(self.stage_key, request.data['stage'])
+                TechnologiesCurrentStage.objects.create(stage=stage)
+            cache.set(self.stage_key, stage)
             # request.get(controller_link)
             return Response()
         except DataBaseException:
@@ -397,14 +403,15 @@ class TechnologiesVideoLabelAPIView(APIView):
         # handles post-requests from the control screen, sets selected video label
         try:
             count_of_records = TechnologiesCurrentLabel.objects.count()
+            label = request.data['label']
             if count_of_records == 0:
-                TechnologiesCurrentLabel.objects.create(label=request.data['label'])
+                TechnologiesCurrentLabel.objects.create(label=label)
             elif count_of_records == 1:
-                TechnologiesCurrentLabel.objects.update(label=request.data['label'])
+                TechnologiesCurrentLabel.objects.update(label=label)
             else:
                 TechnologiesCurrentLabel.objects.all().delete()
-                TechnologiesCurrentLabel.objects.create(label=request.data['label'])
-            cache.set(self.label_key, request.data['label'])
+                TechnologiesCurrentLabel.objects.create(label=label)
+            cache.set(self.label_key, label)
             return Response()
         except DataBaseException:
             return Response(data="Unknown database error. Please, check tables and file models.py",
