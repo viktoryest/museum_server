@@ -251,14 +251,11 @@ class AreaSamaraStageAPIView(APIView):
             stage = request.data['stage']
             if count_of_records == 0:
                 AreaSamaraCurrentStage.objects.create(stage=stage)
-                AreaSamaraAutoPlayAPIView.post(AreaSamaraAutoPlayAPIView, request, 0)
             elif count_of_records == 1:
                 AreaSamaraCurrentStage.objects.update(stage=stage)
-                AreaSamaraAutoPlayAPIView.post(AreaSamaraAutoPlayAPIView, request, 0)
             else:
                 AreaSamaraCurrentStage.objects.all().delete()
                 AreaSamaraCurrentStage.objects.create(stage=stage)
-                AreaSamaraAutoPlayAPIView.post(AreaSamaraAutoPlayAPIView, request, 0)
             cache.set(self.stage_key, stage)
             return Response()
         except DataBaseException:
@@ -296,16 +293,17 @@ class AreaSamaraAutoPlayAPIView(APIView):
             current_condition = cache.get(self.autoplay_key)
             if not current_condition:
                 autoplay_condition = AreaSamaraAutoPlay.objects.first()
-                cache.set(self.autoplay_key, autoplay_condition)
-                current_condition = autoplay_condition
-            return Response({"auto_play": f"{current_condition}"})
+                cache.set(self.autoplay_key, autoplay_condition.auto_play)
+                current_condition = autoplay_condition.auto_play
+            return Response({"auto_play": current_condition})
         except DataBaseException:
             return Response(data="Unknown database error. Please, check tables and file models.py",
                             status=500, exception=True)
 
-    def post(self, request, condition) -> Response:
+    def post(self, request) -> Response:
         # handles post-request from the controllers or from server (after stage changing in AreaSamara),
         # you should specify autoplay condition: 1 or 0
+        condition = request.data['condition']
         try:
             count_of_records = AreaSamaraAutoPlay.objects.count()
             if count_of_records == 0:

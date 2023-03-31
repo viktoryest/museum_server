@@ -51,7 +51,6 @@ urlpatterns = [
     path('api/area_samara/stage/', AreaSamaraStageAPIView.as_view()),
     path('api/area_samara/<int:stage>/video/', AreaSamaraVideoAPIView.as_view()),
     path('api/area_samara/auto_play/', AreaSamaraAutoPlayAPIView.as_view()),
-    path('api/area_samara/auto_play/<condition>/', AreaSamaraAutoPlayAPIView.as_view()),
     path('api/technologies/stage/', TechnologiesStageAPIView.as_view()),
     path('api/technologies/video_label/', TechnologiesVideoLabelAPIView.as_view()),
     path('api/technologies/fourth_video/<label>/', TechnologiesFourthAPIView.as_view()),
