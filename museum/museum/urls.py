@@ -58,6 +58,7 @@ urlpatterns = [
     path('api/technologies/<video_type>/<stage>/', TechnologiesMovingAndBackstageAPIView.as_view()),
     path('api/flows/', FlowMaskAPIView.as_view()),
     path('api/whole/', WholeMaskAPIView.as_view()),
+    path('api/whole/<mask>/', WholeMaskAPIView.as_view()),
     path('api/entry_group/video/', EntryGroupVideoAPIView.as_view()),
     path('api/idle/<app>/', IdleAPIView.as_view()),
     path('api/idle/<app>/<field>/', IdleAPIView.as_view()),

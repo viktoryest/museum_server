@@ -8,6 +8,9 @@ from exceptions import DataBaseException
 import requests  # for sending a request to the controller
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
+import time
+# import aiohttp
+# import asyncio
 
 
 class VideoStandPageAPIView(APIView):
@@ -233,15 +236,33 @@ class WholeMaskAPIView(APIView):
 
     def get(self, request) -> Response:
         # sends get-requests to Laurant and changes condition of the whole mask
-
+        # the following code block allows to avoid a Max retries exceeded error
         session = requests.Session()
         retry = Retry(connect=3, backoff_factor=0.5)
         adapter = HTTPAdapter(max_retries=retry)
         session.mount('http://', adapter)
         session.mount('https://', adapter)
+        laurant_request = session.get('https://kolbs.privolga.keenetic.link/cmd.cgi?psw=Laurent&cmd=RID,ALL')
+        laurant_response = laurant_request.content
+        while True:
+            new_mask = int(laurant_response[5:12], base=2)
 
-        laurant_response = session.get('https://kolbs.privolga.keenetic.link/cmd.cgi?psw=Laurent&cmd=RID,ALL')
-        new_mask = int(laurant_response.content[5:12], base=2)
+            count_of_records = FlowMask.objects.count()
+            if count_of_records == 0:
+                FlowMask.objects.create(mask=new_mask)
+            elif count_of_records == 1:
+                FlowMask.objects.update(mask=new_mask)
+            else:
+                FlowMask.objects.all().delete()
+                FlowMask.objects.create(mask=new_mask)
+            cache.set(self.mask_key, bin(new_mask)[2:].zfill(7))
+            time.sleep(0.3)
+            print('I am working')
+            return Response()
+
+    def post(self, request, mask) -> Response:
+        # handles post-requests, sets the mask entirely
+        new_mask = int(mask, base=2)
 
         count_of_records = FlowMask.objects.count()
         if count_of_records == 0:
