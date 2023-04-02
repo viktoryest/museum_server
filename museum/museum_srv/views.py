@@ -4,10 +4,10 @@ from .models import VideoStandPage, VideoStandEmployee, VideoStandCurrentEmploye
     TimeLineCurrentYear, FlowMask, AreaSamara, AreaSamaraCurrentStage, Technologies, TechnologiesCurrentStage, \
     TechnologiesFourth, TechnologiesCurrentLabel, EntryGroupVideo, AreaSamaraAutoPlay, Idle
 from django.core.cache import cache
-from exceptions import *
-
-
-# import requests - for sending a request to the controller
+from exceptions import DataBaseException
+import requests  # for sending a request to the controller
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
 
 
 class VideoStandPageAPIView(APIView):
@@ -215,6 +215,34 @@ class FlowMaskAPIView(APIView):
             new_mask = mask | (1 << position)
         elif not condition and type(condition) == bool:
             new_mask = mask & ~(1 << position)
+        count_of_records = FlowMask.objects.count()
+        if count_of_records == 0:
+            FlowMask.objects.create(mask=new_mask)
+        elif count_of_records == 1:
+            FlowMask.objects.update(mask=new_mask)
+        else:
+            FlowMask.objects.all().delete()
+            FlowMask.objects.create(mask=new_mask)
+        cache.set(self.mask_key, bin(new_mask)[2:].zfill(7))
+        return Response()
+
+
+class WholeMaskAPIView(APIView):
+    """Listening to Laurant and changing mask"""
+    mask_key = 'flow_mask'
+
+    def get(self, request) -> Response:
+        # sends get-requests to Laurant and changes condition of the whole mask
+
+        session = requests.Session()
+        retry = Retry(connect=3, backoff_factor=0.5)
+        adapter = HTTPAdapter(max_retries=retry)
+        session.mount('http://', adapter)
+        session.mount('https://', adapter)
+
+        laurant_response = session.get('https://kolbs.privolga.keenetic.link/cmd.cgi?psw=Laurent&cmd=RID,ALL')
+        new_mask = int(laurant_response.content[5:12], base=2)
+
         count_of_records = FlowMask.objects.count()
         if count_of_records == 0:
             FlowMask.objects.create(mask=new_mask)

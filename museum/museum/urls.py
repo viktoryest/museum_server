@@ -17,8 +17,9 @@ from django.contrib import admin
 from django.urls import path, re_path
 from museum_srv.views import VideoStandPageAPIView, VideoStandEmployeeListAPIView, TimeLineYearAPIView, \
     TimeLineVideoAPIView, AreaSamaraStageAPIView, AreaSamaraVideoAPIView, AreaSamaraAutoPlayAPIView, \
-    TechnologiesStageAPIView, TechnologiesVideoLabelAPIView, FlowMaskAPIView, VideoStandEmployeeAPIView, \
-    TechnologiesFourthAPIView, TechnologiesMovingAndBackstageAPIView, EntryGroupVideoAPIView, IdleAPIView
+    TechnologiesStageAPIView, TechnologiesVideoLabelAPIView, FlowMaskAPIView, WholeMaskAPIView,\
+    VideoStandEmployeeAPIView, TechnologiesFourthAPIView, TechnologiesMovingAndBackstageAPIView, \
+    EntryGroupVideoAPIView, IdleAPIView
 from django.conf import settings
 from django.conf.urls.static import static
 from rest_framework import permissions
@@ -56,6 +57,7 @@ urlpatterns = [
     path('api/technologies/fourth_video/<label>/', TechnologiesFourthAPIView.as_view()),
     path('api/technologies/<video_type>/<stage>/', TechnologiesMovingAndBackstageAPIView.as_view()),
     path('api/flows/', FlowMaskAPIView.as_view()),
+    path('api/whole/', WholeMaskAPIView.as_view()),
     path('api/entry_group/video/', EntryGroupVideoAPIView.as_view()),
     path('api/idle/<app>/', IdleAPIView.as_view()),
     path('api/idle/<app>/<field>/', IdleAPIView.as_view()),
