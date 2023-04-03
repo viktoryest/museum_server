@@ -36,9 +36,10 @@ def listen_to_laurant_flows():
         adapter = HTTPAdapter(max_retries=retry)
         session.mount('http://', adapter)
         session.mount('https://', adapter)
-        laurant_request = requests.get('https://kolbs.privolga.keenetic.link/cmd.cgi?psw=Laurent&cmd=RID,ALL')
+        laurant_request = requests.get('http://192.168.1.3/cmd.cgi?psw=Laurent&cmd=RID,ALL')
         laurant_response = laurant_request.content
         new_mask = laurant_response[5:12]
+        new_mask = new_mask[::-1]
         WholeMaskAPIView.post(self=WholeMaskAPIView, request=None, mask=new_mask)
         time.sleep(0.3)
 
