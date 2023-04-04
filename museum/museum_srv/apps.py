@@ -19,7 +19,7 @@ def create_default_tables(sender, **kwargs):
 def setDaemon(self, daemonic: bool) -> None:
     import threading
 
-    t = threading.Thread(target=listen_to_laurant_flows)
+    t = threading.Thread(target=listen_to_laurant_flows, daemon=True)
     t.start()
 
 
@@ -28,7 +28,7 @@ def listen_to_laurant_flows():
     import time
     from requests.adapters import HTTPAdapter
     from urllib3.util.retry import Retry
-    from museum_srv.views import WholeMaskAPIView
+    from museum_srv.views import WholeMaskAPIView, FlowMaskAPIView
 
     while True:
         try:
@@ -39,12 +39,17 @@ def listen_to_laurant_flows():
             session.mount('https://', adapter)
             laurant_request = requests.get('http://192.168.1.3/cmd.cgi?psw=Laurent&cmd=RID,ALL')
             laurant_response = laurant_request.content
-            new_mask = laurant_response[5:12]
-            new_mask = new_mask[::-1]
-            WholeMaskAPIView.post(self=WholeMaskAPIView, request=None, mask=new_mask)
-            print(f'Flows mask from laurent: {new_mask}')
+            laurant_mask = laurant_response[5:12]
+            reverted_mask = laurant_mask[::-1]
+            new_mask = str(reverted_mask)[2:9].zfill(7)
+            current_mask_response = FlowMaskAPIView.get(self=FlowMaskAPIView, request=None)
+            current_mask = current_mask_response.data['mask']
+            if current_mask != new_mask:
+                WholeMaskAPIView.post(self=WholeMaskAPIView, request=None, mask=new_mask)
+                print(f'Flows mask from laurent: {new_mask}')
         except Exception as e:
             print(f'Error while getting flows mask from laurent: {e}')
+            time.sleep(1)
         time.sleep(0.3)
 
 
