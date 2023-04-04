@@ -489,14 +489,15 @@ class IdleAPIView(APIView):
     state_key = 'state_key'
 
     def get(self, request, app, field) -> Response:
+        app_cache_key = f'{self.state_key}_{app}'
         # handles get-request from the app, returns state or video and video duration (depends on param 'field'),
         # attention: it's necessary to define app name (param 'app') and field ('video' or 'state')!
         if field == 'state':
             try:
-                current_state = cache.get(self.state_key)
+                current_state = cache.get(app_cache_key)
                 if not current_state:
                     state = Idle.objects.filter(app=app).values('state').first()['state']
-                    cache.set(self.state_key, state)
+                    cache.set(app_cache_key, state)
                     current_state = state
                 return Response({"state": current_state})
             except DataBaseException:
@@ -517,6 +518,7 @@ class IdleAPIView(APIView):
                                 status=500, exception=True)
 
     def post(self, request, app) -> Response:
+        app_cache_key = f'{self.state_key}_{app}'
         # handles post-request from the tablet, sets idle for the app
         data = request.data['state']
         try:
@@ -528,7 +530,7 @@ class IdleAPIView(APIView):
             else:
                 Idle.objects.filter(app=app).delete()
                 Idle.objects.create(app=app, state=data)
-            cache.set(self.state_key, data)
+            cache.set(app_cache_key, data)
             return Response()
         except DataBaseException:
             return Response(data="Unknown database error. Please, check tables and file models.py",
