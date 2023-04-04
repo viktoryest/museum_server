@@ -236,18 +236,22 @@ class WholeMaskAPIView(APIView):
 
     def post(self, request, mask) -> Response:
         # handles post-requests, sets the mask entirely
-        new_mask = int(mask, base=2)
-        with flowsLock:
-            count_of_records = FlowMask.objects.count()
-            if count_of_records == 0:
-                FlowMask.objects.create(mask=new_mask)
-            elif count_of_records == 1:
-                FlowMask.objects.update(mask=new_mask)
-            else:
-                FlowMask.objects.all().delete()
-                FlowMask.objects.create(mask=new_mask)
-            cache.set(self.mask_key, bin(new_mask)[2:].zfill(7))
-        return Response()
+        try:
+            new_mask = int(mask, base=2)
+            with flowsLock:
+                count_of_records = FlowMask.objects.count()
+                if count_of_records == 0:
+                    FlowMask.objects.create(mask=new_mask)
+                elif count_of_records == 1:
+                    FlowMask.objects.update(mask=new_mask)
+                else:
+                    FlowMask.objects.all().delete()
+                    FlowMask.objects.create(mask=new_mask)
+                cache.set(self.mask_key, bin(new_mask)[2:].zfill(7))
+            return Response()
+        except DataBaseException:
+            return Response(data="Unknown database error. Please, check tables and file models.py",
+                            status=500, exception=True)
 
 
 class AreaSamaraStageAPIView(APIView):
