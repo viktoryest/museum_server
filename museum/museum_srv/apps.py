@@ -27,22 +27,20 @@ def listen_to_laurant_flows():
     import requests
     import time
     from museum_srv.views import WholeMaskAPIView
-    import threading
-    lock = threading.Lock()
-    with lock:
-        while True:
-            from requests.adapters import HTTPAdapter
-            from urllib3.util.retry import Retry
-            session = requests.Session()
-            retry = Retry(connect=3, backoff_factor=0.5)
-            adapter = HTTPAdapter(max_retries=retry)
-            session.mount('http://', adapter)
-            session.mount('https://', adapter)
-            laurant_request = requests.get('https://kolbs.privolga.keenetic.link/cmd.cgi?psw=Laurent&cmd=RID,ALL')
-            laurant_response = laurant_request.content
-            new_mask = laurant_response[5:12]
-            WholeMaskAPIView.post(self=WholeMaskAPIView, request=None, mask=new_mask)
-            time.sleep(0.3)
+
+    while True:
+        from requests.adapters import HTTPAdapter
+        from urllib3.util.retry import Retry
+        session = requests.Session()
+        retry = Retry(connect=3, backoff_factor=0.5)
+        adapter = HTTPAdapter(max_retries=retry)
+        session.mount('http://', adapter)
+        session.mount('https://', adapter)
+        laurant_request = requests.get('https://kolbs.privolga.keenetic.link/cmd.cgi?psw=Laurent&cmd=RID,ALL')
+        laurant_response = laurant_request.content
+        new_mask = laurant_response[5:12]
+        WholeMaskAPIView.post(self=WholeMaskAPIView, request=None, mask=new_mask)
+        time.sleep(0.3)
 
 
 class MuseumSrvConfig(AppConfig):

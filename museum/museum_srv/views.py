@@ -5,7 +5,10 @@ from .models import VideoStandPage, VideoStandEmployee, VideoStandCurrentEmploye
     TechnologiesFourth, TechnologiesCurrentLabel, EntryGroupVideo, AreaSamaraAutoPlay, Idle
 from django.core.cache import cache
 from exceptions import DataBaseException
+import threading
 import requests  # for sending a request to the controller
+
+flowsLock = threading.Lock()
 
 
 class VideoStandPageAPIView(APIView):
@@ -196,11 +199,12 @@ class FlowMaskAPIView(APIView):
 
     def get(self, request) -> Response:
         # handles get-requests from the app, returns a mask for on and off flows
-        current_mask = cache.get(self.mask_key)
-        if not current_mask:
-            mask = bin(int(str(FlowMask.objects.first())))[2:].zfill(7)
-            cache.set(self.mask_key, mask)
-            current_mask = mask
+        with flowsLock:
+            current_mask = cache.get(self.mask_key)
+            if not current_mask:
+                mask = bin(int(str(FlowMask.objects.first())))[2:].zfill(7)
+                cache.set(self.mask_key, mask)
+                current_mask = mask
         return Response({"mask": f"{current_mask}"})
 
     def post(self, request) -> Response:
@@ -213,15 +217,16 @@ class FlowMaskAPIView(APIView):
             new_mask = mask | (1 << position)
         elif not condition and type(condition) == bool:
             new_mask = mask & ~(1 << position)
-        count_of_records = FlowMask.objects.count()
-        if count_of_records == 0:
-            FlowMask.objects.create(mask=new_mask)
-        elif count_of_records == 1:
-            FlowMask.objects.update(mask=new_mask)
-        else:
-            FlowMask.objects.all().delete()
-            FlowMask.objects.create(mask=new_mask)
-        cache.set(self.mask_key, bin(new_mask)[2:].zfill(7))
+        with flowsLock:
+            count_of_records = FlowMask.objects.count()
+            if count_of_records == 0:
+                FlowMask.objects.create(mask=new_mask)
+            elif count_of_records == 1:
+                FlowMask.objects.update(mask=new_mask)
+            else:
+                FlowMask.objects.all().delete()
+                FlowMask.objects.create(mask=new_mask)
+            cache.set(self.mask_key, bin(new_mask)[2:].zfill(7))
         return Response()
 
 
@@ -232,16 +237,16 @@ class WholeMaskAPIView(APIView):
     def post(self, request, mask) -> Response:
         # handles post-requests, sets the mask entirely
         new_mask = int(mask, base=2)
-
-        count_of_records = FlowMask.objects.count()
-        if count_of_records == 0:
-            FlowMask.objects.create(mask=new_mask)
-        elif count_of_records == 1:
-            FlowMask.objects.update(mask=new_mask)
-        else:
-            FlowMask.objects.all().delete()
-            FlowMask.objects.create(mask=new_mask)
-        cache.set(self.mask_key, bin(new_mask)[2:].zfill(7))
+        with flowsLock:
+            count_of_records = FlowMask.objects.count()
+            if count_of_records == 0:
+                FlowMask.objects.create(mask=new_mask)
+            elif count_of_records == 1:
+                FlowMask.objects.update(mask=new_mask)
+            else:
+                FlowMask.objects.all().delete()
+                FlowMask.objects.create(mask=new_mask)
+            cache.set(self.mask_key, bin(new_mask)[2:].zfill(7))
         return Response()
 
 
@@ -524,4 +529,3 @@ class IdleAPIView(APIView):
         except DataBaseException:
             return Response(data="Unknown database error. Please, check tables and file models.py",
                             status=500, exception=True)
-
