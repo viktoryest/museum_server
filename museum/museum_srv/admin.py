@@ -1,6 +1,10 @@
 from django.contrib import admin
-from .models import VideoStandEmployee, TimeLine, AreaSamara, Technologies, TechnologiesFourth, \
-    EntryGroupVideo, Idle
+from museum_srv.models.video_stand_models import VideoStandEmployee
+from museum_srv.models.timeline_models import TimeLine
+from museum_srv.models.area_samara_models import AreaSamara
+from museum_srv.models.technologies_models import Technologies, TechnologiesFourth
+from museum_srv.models.entry_group_models import EntryGroupVideo
+from museum_srv.models.idle_models import Idle
 
 admin.site.disable_action('delete_selected')
 admin.site.register(VideoStandEmployee)

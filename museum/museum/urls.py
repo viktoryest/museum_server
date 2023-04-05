@@ -15,11 +15,16 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, re_path
-from museum_srv.views import VideoStandPageAPIView, VideoStandEmployeeListAPIView, TimeLineYearAPIView, \
-    TimeLineVideoAPIView, AreaSamaraStageAPIView, AreaSamaraVideoAPIView, AreaSamaraAutoPlayAPIView, \
-    TechnologiesStageAPIView, TechnologiesVideoLabelAPIView, FlowMaskAPIView, WholeMaskAPIView,\
-    VideoStandEmployeeAPIView, TechnologiesFourthAPIView, TechnologiesMovingAndBackstageAPIView, \
-    EntryGroupVideoAPIView, IdleAPIView
+from museum_srv.views.video_stand_views import VideoStandPageAPIView, VideoStandEmployeeListAPIView, \
+    VideoStandEmployeeAPIView
+from museum_srv.views.timeline_views import TimeLineYearAPIView, TimeLineVideoAPIView
+from museum_srv.views.area_samara_views import AreaSamaraStageAPIView, AreaSamaraVideoAPIView, \
+    AreaSamaraAutoPlayAPIView
+from museum_srv.views.technologies_views import TechnologiesStageAPIView, TechnologiesVideoLabelAPIView, \
+    TechnologiesFourthAPIView, TechnologiesMovingAndBackstageAPIView
+from museum_srv.views.flow_mask_views import FlowMaskAPIView, WholeMaskAPIView
+from museum_srv.views.entry_group_views import EntryGroupVideoAPIView
+from museum_srv.views.idle_views import IdleAPIView
 from django.conf import settings
 from django.conf.urls.static import static
 from rest_framework import permissions
