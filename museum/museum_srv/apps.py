@@ -1,11 +1,16 @@
 from django.apps import AppConfig
 from django.db.models.signals import post_migrate
+from exceptions import LaurantException
 
 
 def create_default_tables(sender, **kwargs):
     """Creates tables with default values after migrations"""
-    from museum_srv.models import TimeLine, FlowMask, AreaSamara, AreaSamaraAutoPlay, Technologies, EntryGroupVideo, \
-        Idle
+    from museum_srv.models.timeline_models import TimeLine
+    from museum_srv.models.flow_mask_models import FlowMask
+    from museum_srv.models.area_samara_models import AreaSamara, AreaSamaraAutoPlay
+    from museum_srv.models.technologies_models import Technologies
+    from museum_srv.models.entry_group_models import EntryGroupVideo
+    from museum_srv.models.idle_models import Idle
 
     TimeLine.check_timeline_videos()
     FlowMask.check_flows()
@@ -28,7 +33,7 @@ def listen_to_laurant_flows():
     import time
     from requests.adapters import HTTPAdapter
     from urllib3.util.retry import Retry
-    from museum_srv.views import WholeMaskAPIView, FlowMaskAPIView
+    from museum_srv.views.flow_mask_views import WholeMaskAPIView, FlowMaskAPIView
 
     while True:
         try:
@@ -47,8 +52,8 @@ def listen_to_laurant_flows():
             if current_mask != new_mask:
                 WholeMaskAPIView.post(self=WholeMaskAPIView, request=None, mask=new_mask)
                 print(f'Flows mask from laurent: {new_mask}')
-        except Exception as e:
-            print(f'Error while getting flows mask from laurent: {e}')
+        except LaurantException:
+            print(f'Error while getting flows mask from laurent')
             time.sleep(1)
         time.sleep(0.3)
 
