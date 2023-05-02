@@ -42,7 +42,8 @@ def listen_to_laurant_flows():
             adapter = HTTPAdapter(max_retries=retry)
             session.mount('http://', adapter)
             session.mount('https://', adapter)
-            laurant_request = requests.get('http://192.168.1.3/cmd.cgi?psw=Laurent&cmd=RID,ALL')
+            # add timeout
+            laurant_request = requests.get('http://192.168.1.3/cmd.cgi?psw=Laurent&cmd=RID,ALL', timeout=1)
             laurant_response = laurant_request.content
             laurant_mask = laurant_response[5:12]
             reverted_mask = laurant_mask[::-1]
@@ -55,7 +56,12 @@ def listen_to_laurant_flows():
         except LaurantException:
             print(f'Error while getting flows mask from laurent')
             time.sleep(1)
-        time.sleep(0.3)
+        except requests.exceptions.ConnectionError:
+            print(f'Error while getting flows mask from laurent - timeout')
+            time.sleep(1)
+        except Exception as e:
+            print(f'UNKNOWN Error while getting flows mask from laurent: {e}')
+        time.sleep(0.5)
 
 
 class MuseumSrvConfig(AppConfig):
