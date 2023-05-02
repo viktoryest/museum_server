@@ -34,16 +34,17 @@ def listen_to_laurant_flows():
     from requests.adapters import HTTPAdapter
     from urllib3.util.retry import Retry
     from museum_srv.views.flow_mask_views import WholeMaskAPIView, FlowMaskAPIView
+    from datetime import datetime
 
     while True:
+        current_time = datetime.now().strftime("%H:%M:%S.%f'")
         try:
             session = requests.Session()
             retry = Retry(connect=3, backoff_factor=0.5)
             adapter = HTTPAdapter(max_retries=retry)
             session.mount('http://', adapter)
             session.mount('https://', adapter)
-            # add timeout
-            laurant_request = requests.get('http://192.168.1.3/cmd.cgi?psw=Laurent&cmd=RID,ALL', timeout=1)
+            laurant_request = requests.get('http://192.168.1.3/cmd.cgi?psw=Laurent&cmd=RID,ALL', timeout=2)
             laurant_response = laurant_request.content
             laurant_mask = laurant_response[5:12]
             reverted_mask = laurant_mask[::-1]
@@ -52,16 +53,17 @@ def listen_to_laurant_flows():
             current_mask = current_mask_response.data['mask']
             if current_mask != new_mask:
                 WholeMaskAPIView.post(self=WholeMaskAPIView, request=None, mask=new_mask)
-                print(f'Flows mask from laurent: {new_mask}')
+                print(f'[{current_time}] Flows mask from laurent: {new_mask}')
         except LaurantException:
-            print(f'Error while getting flows mask from laurent')
-            time.sleep(1)
+            print(f'[{current_time}] Error while getting flows mask from laurent')
+            time.sleep(3)
         except requests.exceptions.ConnectionError:
-            print(f'Error while getting flows mask from laurent - timeout')
-            time.sleep(1)
+            print(f'[{current_time}] Error while getting flows mask from laurent - timeout')
+            time.sleep(3)
         except Exception as e:
-            print(f'UNKNOWN Error while getting flows mask from laurent: {e}')
-        time.sleep(0.5)
+            print(f'[{current_time}] UNKNOWN Error while getting flows mask from laurent: {e}')
+            time.sleep(10)
+        time.sleep(1)
 
 
 class MuseumSrvConfig(AppConfig):
