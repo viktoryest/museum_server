@@ -15,6 +15,8 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, re_path
+
+from museum_srv.views.laurent_views import LaurentAPISamaraView
 from museum_srv.views.video_stand_views import VideoStandPageAPIView, VideoStandEmployeeListAPIView, \
     VideoStandEmployeeAPIView
 from museum_srv.views.timeline_views import TimeLineYearAPIView, TimeLineVideoAPIView
@@ -66,6 +68,7 @@ urlpatterns = [
     path('api/entry_group/video/', EntryGroupVideoAPIView.as_view()),
     path('api/idle/<app>/', IdleAPIView.as_view()),
     path('api/idle/<app>/<field>/', IdleAPIView.as_view()),
+    path('api/laurent/samara/', LaurentAPISamaraView.as_view()),
     re_path(r'^swagger(?P<format>\.json|\.yaml)$', schema_view.without_ui(cache_timeout=0), name='schema-json'),
     re_path(r'^swagger/$', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
     re_path(r'^redoc/$', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
