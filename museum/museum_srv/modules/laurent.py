@@ -110,6 +110,8 @@ def handle_technology(response):
         # get first true value
         stage = list(stages_dict.keys())[list(stages_dict.values()).index(True)]
 
+    print("stage: ", stage)
+    print("handle_technology_action: ", handle_technology_action, callable(handle_technology_action))
     if callable(handle_technology_action):
         handle_technology_action(stage)
 
