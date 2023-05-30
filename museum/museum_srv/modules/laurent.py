@@ -29,7 +29,7 @@ def get_url(address: str, command: str):
     return url
 
 
-def listen(address: str, command: str, action: Callable, debug_name: str, sleep_time: int = 1):
+def listen(address: str, command: str, action: Callable, debug_name: str, sleep_time: float = 1):
     while True:
         current_time = datetime.now().strftime("%H:%M:%S.%f'")
         try:
@@ -73,7 +73,6 @@ handle_technology_action: Callable or None = None
 
 def set_handle_technology_action(action: Callable):
     # Need to set this instead of calling model method directly because of circular imports
-    print("set_handle_technology_action")
     global handle_technology_action
     handle_technology_action = action
 
@@ -84,9 +83,7 @@ def handle_technology(response):
     """
 
     # remove first '#RD,' and last '/r/n'
-    print(response)
     laurent_mask = response[4:10].decode('utf-8')
-    print(laurent_mask)
     # create dictionary
     stages_dict = {
         'past': laurent_mask[0] == '0',
@@ -95,9 +92,6 @@ def handle_technology(response):
         'present_3': laurent_mask[4] == '1',
         'future': laurent_mask[5] == '0',
     }
-
-    print(stages_dict)
-    print("sum: ", sum(stages_dict.values()))
 
     stage = None
 
@@ -109,15 +103,13 @@ def handle_technology(response):
         # get first true value
         stage = list(stages_dict.keys())[list(stages_dict.values()).index(True)]
 
-    print("stage: ", stage)
     global handle_technology_action
-    print("handle_technology_action: ", handle_technology_action, callable(handle_technology_action))
     if callable(handle_technology_action):
         handle_technology_action(stage)
 
 
 def listen_technology():
-    listen(technology_address, 'RD,ALL', handle_technology, 'technology stage', 1)
+    listen(technology_address, 'RD,ALL', handle_technology, 'technology stage', .1)
 
 
 def change_technology_move(state: str):
