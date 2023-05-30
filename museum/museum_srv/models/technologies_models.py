@@ -120,6 +120,9 @@ class TechnologiesLaurent:
         if (stage is not None) and (stage not in cls.stages):
             raise ValueError(f'Unknown stage: {cls.target_stage}. Available stages: {cls.stages}')
 
+        if cls.target_stage == stage:
+            return
+
         cls.target_stage = stage
 
         cls.handle_move()
@@ -149,6 +152,7 @@ class TechnologiesLaurent:
                 # moving to the left
                 cls.current_moving_mode = "left"
                 change_technology_move("left")
+            return
 
         # we are reached target stage
         if cls.target_stage == cls.current_stage:

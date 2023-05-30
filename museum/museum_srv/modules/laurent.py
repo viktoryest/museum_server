@@ -120,4 +120,12 @@ def change_technology_move(state: str):
     else:
         raise Exception(f'Unknown state: {state}, should be "left", "right" or "stop"')
 
-    get_laurent(technology_address, command)
+    current_time = datetime.now().strftime("%H:%M:%S.%f'")
+    try:
+        get_laurent(technology_address, command)
+    except LaurentException:
+        print(f'[{current_time}] Error sending technology move to laurent')
+    except requests.exceptions.ConnectionError:
+        print(f'[{current_time}] Error sending technology move to laurent - timeout')
+    except Exception as e:
+        print(f'[{current_time}] UNKNOWN Error sending technology move to laurent: {e}')

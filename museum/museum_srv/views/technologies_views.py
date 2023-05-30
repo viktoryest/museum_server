@@ -133,3 +133,4 @@ class TechnologiesLaurentAPIView(APIView):
         """
         stage = request.data['stage']
         TechnologiesLaurent.move_to_stage(stage)
+        return Response()
