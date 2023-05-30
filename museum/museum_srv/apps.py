@@ -1,6 +1,6 @@
 from django.apps import AppConfig
 from django.db.models.signals import post_migrate
-from exceptions import LaurantException
+from museum_srv.modules.laurent import listen_flows, listen_technology
 
 
 def create_default_tables(sender, **kwargs):
@@ -21,49 +21,14 @@ def create_default_tables(sender, **kwargs):
     Idle.check_idle_videos()
 
 
-def setDaemon(self, daemonic: bool) -> None:
+def set_daemons(self, daemonic: bool) -> None:
     import threading
 
-    t = threading.Thread(target=listen_to_laurant_flows, daemon=True)
+    t = threading.Thread(target=listen_flows, daemon=True)
     t.start()
 
-
-def listen_to_laurant_flows():
-    import requests
-    import time
-    from requests.adapters import HTTPAdapter
-    from urllib3.util.retry import Retry
-    from museum_srv.views.flow_mask_views import WholeMaskAPIView, FlowMaskAPIView
-    from datetime import datetime
-
-    while True:
-        current_time = datetime.now().strftime("%H:%M:%S.%f'")
-        try:
-            session = requests.Session()
-            retry = Retry(connect=3, backoff_factor=0.5)
-            adapter = HTTPAdapter(max_retries=retry)
-            session.mount('http://', adapter)
-            session.mount('https://', adapter)
-            laurant_request = requests.get('http://192.168.1.3/cmd.cgi?psw=Laurent&cmd=RID,ALL', timeout=2)
-            laurant_response = laurant_request.content
-            laurant_mask = laurant_response[5:12]
-            reverted_mask = laurant_mask[::-1]
-            new_mask = str(reverted_mask)[2:9].zfill(7)
-            current_mask_response = FlowMaskAPIView.get(self=FlowMaskAPIView, request=None)
-            current_mask = current_mask_response.data['mask']
-            if current_mask != new_mask:
-                WholeMaskAPIView.post(self=WholeMaskAPIView, request=None, mask=new_mask)
-                print(f'[{current_time}] Flows mask from laurent: {new_mask}')
-        except LaurantException:
-            print(f'[{current_time}] Error while getting flows mask from laurent')
-            time.sleep(3)
-        except requests.exceptions.ConnectionError:
-            print(f'[{current_time}] Error while getting flows mask from laurent - timeout')
-            time.sleep(3)
-        except Exception as e:
-            print(f'[{current_time}] UNKNOWN Error while getting flows mask from laurent: {e}')
-            time.sleep(10)
-        time.sleep(1)
+    t = threading.Thread(target=listen_technology, daemon=True)
+    t.start()
 
 
 class MuseumSrvConfig(AppConfig):
@@ -72,4 +37,4 @@ class MuseumSrvConfig(AppConfig):
 
     def ready(self):
         post_migrate.connect(create_default_tables, sender=self)
-        setDaemon(self, True)
+        set_daemons(self, True)

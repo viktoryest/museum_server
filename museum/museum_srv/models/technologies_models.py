@@ -2,9 +2,10 @@ from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models.fields.files import FieldFile
 from moviepy.editor import VideoFileClip
-import os
 from museum.settings import BASE_DIR
 from django.core.validators import FileExtensionValidator
+from museum_srv.modules.laurent import change_technology_move, set_handle_technology_action
+import os
 
 
 class Technologies(models.Model):
@@ -49,7 +50,7 @@ class Technologies(models.Model):
 
     @classmethod
     def check_technologies_stages(cls):
-        list_of_stages = ['past', 'present_1', 'present_2', 'future']
+        list_of_stages = ['past', 'present_1', 'present_2', 'present_3', 'future']
         for stage in list_of_stages:
             if not cls.objects.filter(stage=stage):
                 cls.objects.create(stage=stage)
@@ -102,3 +103,68 @@ class TechnologiesCurrentLabel(models.Model):
 
     def __str__(self):
         return self.label
+
+
+class TechnologiesLaurent:
+    target_stage = None
+    current_stage = None
+    current_moving_mode = "stop"
+    stages = ['past', 'present_1', 'present_2', 'present_3', 'future']
+
+    @classmethod
+    def subscribe_events(cls):
+        set_handle_technology_action(cls.move_to_stage)
+
+    @classmethod
+    def move_to_stage(cls, stage: str):
+        if (stage is not None) and (stage not in cls.stages):
+            raise ValueError(f'Unknown stage: {cls.target_stage}. Available stages: {cls.stages}')
+
+        cls.target_stage = stage
+
+        cls.handle_move()
+
+    @classmethod
+    def change_current_stage(cls, stage: str):
+        if (stage is not None) and (stage not in cls.stages):
+            raise ValueError(f'Unknown stage: {cls.target_stage}. Available stages: {cls.stages}')
+
+        if cls.current_stage == stage:
+            return
+
+        cls.current_stage = stage
+
+        cls.handle_move()
+
+    @classmethod
+    def handle_move(cls):
+        # going nowhere, we will automatically stop at the ends of the rail
+        if cls.target_stage is None:
+            return
+
+        # we are outside all dimensions
+        if cls.current_stage is None:
+            # and we are not moving
+            if cls.current_moving_mode == "stop":
+                # moving to the left
+                cls.current_moving_mode = "left"
+                change_technology_move("left")
+
+        # we are reached target stage
+        if cls.target_stage == cls.current_stage:
+            cls.target_stage = None
+            cls.current_moving_mode = "stop"
+            change_technology_move("stop")
+            return
+
+        # if index of target stage is less than index of current stage, move to the left
+        if cls.stages.index(cls.target_stage) < cls.stages.index(cls.current_stage):
+            cls.current_moving_mode = "left"
+            change_technology_move("left")
+            return
+
+        # if index of target stage is greater than index of current stage, move to the right
+        if cls.stages.index(cls.target_stage) > cls.stages.index(cls.current_stage):
+            cls.current_moving_mode = "right"
+            change_technology_move("right")
+            return

@@ -1,7 +1,7 @@
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from museum_srv.models.technologies_models import Technologies, TechnologiesCurrentStage, TechnologiesFourth, \
-    TechnologiesCurrentLabel
+    TechnologiesCurrentLabel, TechnologiesLaurent
 from django.core.cache import cache
 from exceptions import DataBaseException
 
@@ -122,3 +122,14 @@ class TechnologiesMovingAndBackstageAPIView(APIView):
         except DataBaseException:
             return Response(data="Unknown database error. Please, check tables and file models.py",
                             status=500, exception=True)
+
+
+class TechnologiesLaurentAPIView(APIView):
+
+    def post(self, request):
+        """
+        Move to stage. Stage is specified in "request.data['stage']"
+        Available stages: past, present_1, present_2, present_3, future
+        """
+        stage = request.data['stage']
+        TechnologiesLaurent.move_to_stage(stage)
