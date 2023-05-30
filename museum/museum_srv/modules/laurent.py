@@ -18,9 +18,15 @@ def get_laurent(address: str, command: str):
     adapter = HTTPAdapter(max_retries=retry)
     session.mount('http://', adapter)
     session.mount('https://', adapter)
-    laurent_request = requests.get(f'{address}/cmd.cgi?psw=Laurent&cmd={command}', timeout=2)
+    url = get_url(address, command)
+    laurent_request = requests.get(url, timeout=2)
     laurent_response = laurent_request.content
     return laurent_response
+
+
+def get_url(address: str, command: str):
+    url = f'{address}/cmd.cgi?psw=Laurent&cmd={command}'
+    return url
 
 
 def listen(address: str, command: str, action: Callable, debug_name: str):
@@ -122,7 +128,9 @@ def change_technology_move(state: str):
 
     current_time = datetime.now().strftime("%H:%M:%S.%f'")
     try:
-        get_laurent(technology_address, command)
+        url = get_url(technology_address, command)
+        resp = get_laurent(technology_address, command)
+        print(f'[{current_time}] Technology move sent to laurent: {state}, url: {url} response: {resp}')
     except LaurentException:
         print(f'[{current_time}] Error sending technology move to laurent')
     except requests.exceptions.ConnectionError:
