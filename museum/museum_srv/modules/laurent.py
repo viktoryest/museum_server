@@ -85,7 +85,7 @@ def handle_technology(response):
 
     # remove first '#RD,' and last '/r/n'
     print(response)
-    laurent_mask = response[4:10]
+    laurent_mask = response[4:10].decode('utf-8')
     print(laurent_mask)
     # create dictionary
     stages_dict = {
@@ -113,7 +113,7 @@ def handle_technology(response):
 
 
 def listen_technology():
-    listen(technology_address, 'RD,ALL', handle_technology, 'technology stage', 20)
+    listen(technology_address, 'RD,ALL', handle_technology, 'technology stage', 10)
 
 
 def change_technology_move(state: str):
