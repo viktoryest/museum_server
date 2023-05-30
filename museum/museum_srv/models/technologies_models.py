@@ -107,7 +107,9 @@ class TechnologiesCurrentLabel(models.Model):
 
 class TechnologiesLaurent:
     target_stage = None
+    target_changed = False
     current_stage = None
+    last_stage = None
     current_moving_mode = "stop"
     stages = ['past', 'present_1', 'present_2', 'present_3', 'future']
 
@@ -124,6 +126,7 @@ class TechnologiesLaurent:
             return
 
         cls.target_stage = stage
+        cls.target_changed = True
 
         cls.handle_move()
 
@@ -137,6 +140,7 @@ class TechnologiesLaurent:
 
         print(f'Changing current stage {cls.current_stage} -> {stage}')
 
+        cls.last_stage = cls.current_stage
         cls.current_stage = stage
 
         cls.handle_move()
@@ -149,28 +153,38 @@ class TechnologiesLaurent:
 
         # we are outside all dimensions
         if cls.current_stage is None:
-            # and we are not moving
-            if cls.current_moving_mode == "stop":
-                # moving to the left
-                cls.current_moving_mode = "left"
-                change_technology_move("left")
+            # and we have a new target
+            if cls.target_changed:
+                if cls.current_moving_mode == "stop" or cls.last_stage is None:
+                    # move to the left
+                    cls.current_moving_mode = "left"
+                    change_technology_move("left")
+                elif cls.last_stage == cls.target_stage:
+                    # return to last known point, move to the opposite side
+                    mode = "right" if cls.current_moving_mode == "left" else "left"
+                    cls.current_moving_mode = mode
+                    change_technology_move(mode)
+                else:
+                    mode = cls.get_move_mode(cls.last_stage, cls.target_stage)
+                    cls.current_moving_mode = mode
+                    change_technology_move(mode)
+
             return
+
+        move_mode = cls.get_move_mode(cls.current_stage, cls.target_stage)
 
         # we are reached target stage
-        if cls.target_stage == cls.current_stage:
+        if move_mode == "stop":
             cls.target_stage = None
-            cls.current_moving_mode = "stop"
-            change_technology_move("stop")
-            return
 
-        # if index of target stage is less than index of current stage, move to the left
-        if cls.stages.index(cls.target_stage) < cls.stages.index(cls.current_stage):
-            cls.current_moving_mode = "left"
-            change_technology_move("left")
-            return
+        cls.current_moving_mode = move_mode
+        change_technology_move(move_mode)
 
-        # if index of target stage is greater than index of current stage, move to the right
-        if cls.stages.index(cls.target_stage) > cls.stages.index(cls.current_stage):
-            cls.current_moving_mode = "right"
-            change_technology_move("right")
-            return
+    @classmethod
+    def get_move_mode(cls, stage: str, target: str):
+        if target == stage:
+            return "stop"
+        if cls.stages.index(target) < cls.stages.index(stage):
+            return "left"
+        if cls.stages.index(target) > cls.stages.index(stage):
+            return "right"

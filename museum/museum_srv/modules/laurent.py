@@ -109,7 +109,7 @@ def handle_technology(response):
 
 
 def listen_technology():
-    listen(technology_address, 'RD,ALL', handle_technology, 'technology stage', .1)
+    listen(technology_address, 'RD,ALL', handle_technology, 'technology stage', .3)
 
 
 def change_technology_move(state: str):
