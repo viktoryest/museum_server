@@ -113,7 +113,7 @@ class TechnologiesLaurent:
 
     @classmethod
     def subscribe_events(cls):
-        set_handle_technology_action(cls.move_to_stage)
+        set_handle_technology_action(cls.change_current_stage)
 
     @classmethod
     def move_to_stage(cls, stage: str):
@@ -134,6 +134,8 @@ class TechnologiesLaurent:
 
         if cls.current_stage == stage:
             return
+
+        print(f'Changing current stage {cls.current_stage} -> {stage}')
 
         cls.current_stage = stage
 
