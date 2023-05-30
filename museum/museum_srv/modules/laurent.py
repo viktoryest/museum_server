@@ -97,6 +97,8 @@ def handle_technology(response):
     }
 
     print(stages_dict)
+    print("sum: ", sum(stages_dict.values()))
+    print("number of true", list(stages_dict.values()).count(True))
 
     stage = None
 
