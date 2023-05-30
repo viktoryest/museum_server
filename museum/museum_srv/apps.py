@@ -8,7 +8,7 @@ def create_default_tables(sender, **kwargs):
     from museum_srv.models.timeline_models import TimeLine
     from museum_srv.models.flow_mask_models import FlowMask
     from museum_srv.models.area_samara_models import AreaSamara, AreaSamaraAutoPlay
-    from museum_srv.models.technologies_models import Technologies
+    from museum_srv.models.technologies_models import Technologies, TechnologiesLaurent
     from museum_srv.models.entry_group_models import EntryGroupVideo
     from museum_srv.models.idle_models import Idle
 
@@ -17,6 +17,7 @@ def create_default_tables(sender, **kwargs):
     AreaSamara.check_area_samara_stages()
     AreaSamaraAutoPlay.check_area_samara_auto_play()
     Technologies.check_technologies_stages()
+    TechnologiesLaurent.subscribe_events()
     EntryGroupVideo.check_entry_group_video()
     Idle.check_idle_videos()
 

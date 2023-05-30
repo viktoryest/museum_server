@@ -73,7 +73,7 @@ handle_technology_action: Callable or None = None
 
 def set_handle_technology_action(action: Callable):
     # Need to set this instead of calling model method directly because of circular imports
-
+    print("set_handle_technology_action")
     global handle_technology_action
     handle_technology_action = action
 
@@ -98,7 +98,6 @@ def handle_technology(response):
 
     print(stages_dict)
     print("sum: ", sum(stages_dict.values()))
-    print("number of true", list(stages_dict.values()).count(True))
 
     stage = None
 
@@ -111,13 +110,14 @@ def handle_technology(response):
         stage = list(stages_dict.keys())[list(stages_dict.values()).index(True)]
 
     print("stage: ", stage)
+    global handle_technology_action
     print("handle_technology_action: ", handle_technology_action, callable(handle_technology_action))
     if callable(handle_technology_action):
         handle_technology_action(stage)
 
 
 def listen_technology():
-    listen(technology_address, 'RD,ALL', handle_technology, 'technology stage', 10)
+    listen(technology_address, 'RD,ALL', handle_technology, 'technology stage', 1)
 
 
 def change_technology_move(state: str):
