@@ -29,7 +29,7 @@ def get_url(address: str, command: str):
     return url
 
 
-def listen(address: str, command: str, action: Callable, debug_name: str):
+def listen(address: str, command: str, action: Callable, debug_name: str, sleep_time: int = 1):
     while True:
         current_time = datetime.now().strftime("%H:%M:%S.%f'")
         try:
@@ -44,7 +44,7 @@ def listen(address: str, command: str, action: Callable, debug_name: str):
         except Exception as e:
             print(f'[{current_time}] UNKNOWN Error while getting {debug_name} from laurent: {e}')
             time.sleep(10)
-        time.sleep(1)
+        time.sleep(sleep_time)
 
 
 def handle_flows(response: str):
@@ -84,7 +84,9 @@ def handle_technology(response):
     """
 
     # remove first '#RD,' and last '/r/n'
+    print(response)
     laurent_mask = response[4:10]
+    print(laurent_mask)
     # create dictionary
     stages_dict = {
         'past': laurent_mask[0] == '0',
@@ -93,6 +95,8 @@ def handle_technology(response):
         'present_3': laurent_mask[4] == '1',
         'future': laurent_mask[5] == '0',
     }
+
+    print(stages_dict)
 
     stage = None
 
@@ -109,7 +113,7 @@ def handle_technology(response):
 
 
 def listen_technology():
-    listen(technology_address, 'RD,ALL', handle_technology, 'technology stage')
+    listen(technology_address, 'RD,ALL', handle_technology, 'technology stage', 20)
 
 
 def change_technology_move(state: str):
