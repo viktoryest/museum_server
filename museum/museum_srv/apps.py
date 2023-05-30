@@ -1,5 +1,6 @@
 from django.apps import AppConfig
 from django.db.models.signals import post_migrate
+
 from museum_srv.modules.laurent import listen_flows, listen_technology
 
 
@@ -8,7 +9,7 @@ def create_default_tables(sender, **kwargs):
     from museum_srv.models.timeline_models import TimeLine
     from museum_srv.models.flow_mask_models import FlowMask
     from museum_srv.models.area_samara_models import AreaSamara, AreaSamaraAutoPlay
-    from museum_srv.models.technologies_models import Technologies, TechnologiesLaurent
+    from museum_srv.models.technologies_models import Technologies
     from museum_srv.models.entry_group_models import EntryGroupVideo
     from museum_srv.models.idle_models import Idle
 
@@ -17,7 +18,6 @@ def create_default_tables(sender, **kwargs):
     AreaSamara.check_area_samara_stages()
     AreaSamaraAutoPlay.check_area_samara_auto_play()
     Technologies.check_technologies_stages()
-    TechnologiesLaurent.subscribe_events()
     EntryGroupVideo.check_entry_group_video()
     Idle.check_idle_videos()
 
@@ -37,5 +37,7 @@ class MuseumSrvConfig(AppConfig):
     name = 'museum_srv'
 
     def ready(self):
+        from museum_srv.models.technologies_models import TechnologiesLaurent
         post_migrate.connect(create_default_tables, sender=self)
+        TechnologiesLaurent.subscribe_events()
         set_daemons(self, True)
