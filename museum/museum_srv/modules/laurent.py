@@ -129,8 +129,9 @@ def change_technology_move(state: str):
     current_time = datetime.now().strftime("%H:%M:%S.%f'")
     try:
         url = get_url(technology_address, command)
+        print(f'[{current_time}] Technology move sent to laurent: {state}, url: {url}')
         resp = get_laurent(technology_address, command)
-        print(f'[{current_time}] Technology move sent to laurent: {state}, url: {url} response: {resp}')
+        print(f'[{current_time}] Technology response: {resp}')
     except LaurentException:
         print(f'[{current_time}] Error sending technology move to laurent')
     except requests.exceptions.ConnectionError:
