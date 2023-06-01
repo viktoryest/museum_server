@@ -34,9 +34,6 @@ class TechnologiesStageAPIView(APIView):
             count_of_records = TechnologiesCurrentStage.objects.count()
             stage = request.data['stage']
 
-            # preparing for the stage
-            TechnologiesLaurent.move_to_point(stage, True)
-
             if count_of_records == 0:
                 TechnologiesCurrentStage.objects.create(stage=stage)
             elif count_of_records == 1:
@@ -45,6 +42,11 @@ class TechnologiesStageAPIView(APIView):
                 TechnologiesCurrentStage.objects.all().delete()
                 TechnologiesCurrentStage.objects.create(stage=stage)
             cache.set(self.stage_key, stage)
+
+            # preparing for the stage
+            point = TechnologiesLaurent.point_from_stage(stage)
+            TechnologiesLaurent.move_to_point(point, True)
+
             return Response()
         except DataBaseException:
             return Response(data="Unknown database error. Please, check tables and file models.py",

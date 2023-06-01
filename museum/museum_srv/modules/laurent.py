@@ -29,11 +29,16 @@ def get_url(address: str, command: str):
     return url
 
 
-def listen(address: str, command: str, action: Callable, debug_name: str, sleep_time: float = 1):
+def listen(address: str, command: str, action: Callable, debug_name: str, sleep_time: float = 1, debug: bool = False):
     while True:
         current_time = datetime.now().strftime("%H:%M:%S.%f'")
         try:
-            laurent_response = get_laurent(address, command)
+            if debug:
+                # read from file
+                with open('laurent_response.txt', 'r') as file:
+                    laurent_response = file.read().encode('utf-8')
+            else:
+                laurent_response = get_laurent(address, command)
             action(laurent_response)
         except LaurentException:
             print(f'[{current_time}] Error while getting {debug_name} from laurent')
