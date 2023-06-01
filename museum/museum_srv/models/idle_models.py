@@ -37,7 +37,15 @@ class Idle(models.Model):
 
     @classmethod
     def check_idle_videos(cls):
-        list_of_apps = ['human_capital', 'timeline', 'samara', 'flows', 'technology']
+        list_of_apps = [
+            'human_capital',
+            'timeline',
+            'samara',
+            'flows',
+            'technology',
+            'technology_vertical',
+            'technology_small',
+        ]
         for app in list_of_apps:
             if not cls.objects.filter(app=app):
                 cls.objects.create(app=app, state=0)

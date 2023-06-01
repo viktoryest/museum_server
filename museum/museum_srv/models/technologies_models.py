@@ -50,10 +50,12 @@ class Technologies(models.Model):
 
     @classmethod
     def check_technologies_stages(cls):
-        list_of_stages = ['past', 'present_1', 'present_2', 'present_3', 'future']
+        list_of_stages = ['past', 'diaskan', 'volzhanka', 'future']
         for stage in list_of_stages:
             if not cls.objects.filter(stage=stage):
                 cls.objects.create(stage=stage)
+        # delete stages that are not in list_of_stages
+        cls.objects.exclude(stage__in=list_of_stages).delete()
 
     def __str__(self):
         return self.stage
@@ -106,85 +108,109 @@ class TechnologiesCurrentLabel(models.Model):
 
 
 class TechnologiesLaurent:
-    target_stage = None
+    target_point = None
     target_changed = False
-    current_stage = None
-    last_stage = None
+    current_point = None
+    last_point = None
     current_moving_mode = "stop"
-    stages = ['past', 'present_1', 'present_2', 'present_3', 'future']
+    preparation = False
+    points = ['past', 'present_1', 'present_2', 'present_3', 'future']
+
+    @classmethod
+    def point_from_stage(cls, stage: str):
+        match stage:
+            case 'past':
+                return 'past'
+            case 'diaskan':
+                return 'present_1'
+            case 'volzhanka':
+                return 'present_3'
+            case 'future':
+                return 'future'
 
     @classmethod
     def subscribe_events(cls):
-        set_handle_technology_action(cls.change_current_stage)
+        set_handle_technology_action(cls.change_current_point)
 
     @classmethod
-    def move_to_stage(cls, stage: str):
-        if (stage is not None) and (stage not in cls.stages):
-            raise ValueError(f'Unknown stage: {cls.target_stage}. Available stages: {cls.stages}')
+    def move_to_point(cls, point: str, preparation: bool = False):
+        """
+        :param point: point to move to
+        :param preparation: True if we are in preparation mode, moving screen before starting the stage
+        """
+        if (point is not None) and (point not in cls.points):
+            raise ValueError(f'Unknown point: {cls.target_point}. Available points: {cls.points}')
 
-        if cls.target_stage == stage:
+        cls.preparation = preparation
+
+        if cls.target_point == point:
             return
 
-        cls.target_stage = stage
+        cls.target_point = point
         cls.target_changed = True
 
         cls.handle_move()
 
     @classmethod
-    def change_current_stage(cls, stage: str):
-        if (stage is not None) and (stage not in cls.stages):
-            raise ValueError(f'Unknown stage: {cls.target_stage}. Available stages: {cls.stages}')
+    def change_current_point(cls, point: str):
+        """ Set the point we are currently in
+        :param point: point we are currently in
+        """
+        if (point is not None) and (point not in cls.points):
+            raise ValueError(f'Unknown point: {cls.target_point}. Available points: {cls.points}')
 
-        if cls.current_stage == stage:
+        if cls.current_point == point:
             return
 
-        print(f'Changing current stage {cls.current_stage} -> {stage}')
+        print(f'Changing current point {cls.current_point} -> {point}')
 
-        cls.last_stage = cls.current_stage
-        cls.current_stage = stage
+        cls.last_point = cls.current_point
+        cls.current_point = point
 
         cls.handle_move()
 
     @classmethod
     def handle_move(cls):
         # going nowhere, we will automatically stop at the ends of the rail
-        if cls.target_stage is None:
+        if cls.target_point is None:
             return
 
         # we are outside all dimensions
-        if cls.current_stage is None:
+        if cls.current_point is None:
             # and we have a new target
             if cls.target_changed:
-                if cls.current_moving_mode == "stop" or cls.last_stage is None:
+                if cls.current_moving_mode == "stop" or cls.last_point is None:
                     # move to the left
                     cls.current_moving_mode = "left"
                     change_technology_move("left")
-                elif cls.last_stage == cls.target_stage:
+                elif cls.last_point == cls.target_point:
                     # return to last known point, move to the opposite side
                     mode = "right" if cls.current_moving_mode == "left" else "left"
                     cls.current_moving_mode = mode
                     change_technology_move(mode)
                 else:
-                    mode = cls.get_move_mode(cls.last_stage, cls.target_stage)
+                    # move to another point
+                    mode = cls.get_move_mode(cls.last_point, cls.target_point)
                     cls.current_moving_mode = mode
                     change_technology_move(mode)
 
             return
 
-        move_mode = cls.get_move_mode(cls.current_stage, cls.target_stage)
+        move_mode = cls.get_move_mode(cls.current_point, cls.target_point)
 
-        # we are reached target stage
+        # we are reached target point
         if move_mode == "stop":
-            cls.target_stage = None
+            cls.preparation = False
+            cls.target_point = None
 
         cls.current_moving_mode = move_mode
         change_technology_move(move_mode)
 
     @classmethod
-    def get_move_mode(cls, stage: str, target: str):
-        if target == stage:
+    def get_move_mode(cls, current_point: str, target_point: str):
+        if target_point == current_point:
             return "stop"
-        if cls.stages.index(target) < cls.stages.index(stage):
+        if cls.points.index(target_point) < cls.points.index(current_point):
             return "left"
-        if cls.stages.index(target) > cls.stages.index(stage):
+        if cls.points.index(target_point) > cls.points.index(current_point):
             return "right"

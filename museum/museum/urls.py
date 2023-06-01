@@ -60,7 +60,7 @@ urlpatterns = [
     path('api/area_samara/<int:stage>/video/', AreaSamaraVideoAPIView.as_view()),
     path('api/area_samara/auto_play/', AreaSamaraAutoPlayAPIView.as_view()),
     path('api/technologies/stage/', TechnologiesStageAPIView.as_view()),
-    path('api/technologies/laurent_stage/', TechnologiesLaurentAPIView.as_view()),
+    path('api/technologies/laurent_point/', TechnologiesLaurentAPIView.as_view()),
     path('api/technologies/video_label/', TechnologiesVideoLabelAPIView.as_view()),
     path('api/technologies/fourth_video/<label>/', TechnologiesFourthAPIView.as_view()),
     path('api/technologies/<video_type>/<stage>/', TechnologiesMovingAndBackstageAPIView.as_view()),

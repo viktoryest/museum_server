@@ -14,6 +14,10 @@ class TechnologiesStageAPIView(APIView):
         # handles get-requests from the app with the backstage video, the moving screen and the control screen,
         # returns selected stage
         try:
+            # preparing for the stage
+            if TechnologiesLaurent.preparation:
+                return Response({"stage": "preparation"})
+
             current_stage = cache.get(self.stage_key)
             if not current_stage:
                 stage = TechnologiesCurrentStage.objects.first()
@@ -29,6 +33,10 @@ class TechnologiesStageAPIView(APIView):
         try:
             count_of_records = TechnologiesCurrentStage.objects.count()
             stage = request.data['stage']
+
+            # preparing for the stage
+            TechnologiesLaurent.move_to_point(stage, True)
+
             if count_of_records == 0:
                 TechnologiesCurrentStage.objects.create(stage=stage)
             elif count_of_records == 1:
@@ -37,7 +45,6 @@ class TechnologiesStageAPIView(APIView):
                 TechnologiesCurrentStage.objects.all().delete()
                 TechnologiesCurrentStage.objects.create(stage=stage)
             cache.set(self.stage_key, stage)
-            # request.get(controller_link)
             return Response()
         except DataBaseException:
             return Response(data="Unknown database error. Please, check tables and file models.py",
@@ -128,9 +135,9 @@ class TechnologiesLaurentAPIView(APIView):
 
     def post(self, request):
         """
-        Move to stage. Stage is specified in "request.data['stage']"
-        Available stages: past, present_1, present_2, present_3, future
+        Move to point. Point is specified in "request.data['point']"
+        Available points: past, present_1, present_2, present_3, future
         """
-        stage = request.data['stage']
-        TechnologiesLaurent.move_to_stage(stage)
+        point = request.data['point']
+        TechnologiesLaurent.move_to_point(point)
         return Response()
