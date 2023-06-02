@@ -107,6 +107,27 @@ class TechnologiesCurrentLabel(models.Model):
         return self.label
 
 
+class TechnologiesModel:
+    index: int | None = None
+    frame: int = 0
+
+    @classmethod
+    def get_frame(cls):
+        return cls.frame
+
+    @classmethod
+    def set_frame(cls, frame: int):
+        cls.frame = frame
+
+    @classmethod
+    def get_index(cls):
+        return cls.index
+
+    @classmethod
+    def set_index(cls, index: int | None):
+        cls.index = index
+
+
 class TechnologiesLaurent:
     target_point = None
     target_changed = False

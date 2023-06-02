@@ -23,7 +23,8 @@ from museum_srv.views.timeline_views import TimeLineYearAPIView, TimeLineVideoAP
 from museum_srv.views.area_samara_views import AreaSamaraStageAPIView, AreaSamaraVideoAPIView, \
     AreaSamaraAutoPlayAPIView
 from museum_srv.views.technologies_views import TechnologiesStageAPIView, TechnologiesVideoLabelAPIView, \
-    TechnologiesFourthAPIView, TechnologiesMovingAndBackstageAPIView, TechnologiesLaurentAPIView
+    TechnologiesFourthAPIView, TechnologiesMovingAndBackstageAPIView, TechnologiesLaurentAPIView, \
+    TechnologiesModelAPIView
 from museum_srv.views.flow_mask_views import FlowMaskAPIView, WholeMaskAPIView
 from museum_srv.views.entry_group_views import EntryGroupVideoAPIView
 from museum_srv.views.idle_views import IdleAPIView
@@ -63,6 +64,7 @@ urlpatterns = [
     path('api/technologies/laurent_point/', TechnologiesLaurentAPIView.as_view()),
     path('api/technologies/video_label/', TechnologiesVideoLabelAPIView.as_view()),
     path('api/technologies/fourth_video/<label>/', TechnologiesFourthAPIView.as_view()),
+    path('api/technologies/model/<data>/', TechnologiesModelAPIView.as_view()),
     path('api/technologies/<video_type>/<stage>/', TechnologiesMovingAndBackstageAPIView.as_view()),
     path('api/flows/', FlowMaskAPIView.as_view()),
     path('api/flows/<mask>/', WholeMaskAPIView.as_view()),

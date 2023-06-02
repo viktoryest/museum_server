@@ -1,7 +1,7 @@
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from museum_srv.models.technologies_models import Technologies, TechnologiesCurrentStage, TechnologiesFourth, \
-    TechnologiesCurrentLabel, TechnologiesLaurent
+    TechnologiesCurrentLabel, TechnologiesLaurent, TechnologiesModel
 from django.core.cache import cache
 from exceptions import DataBaseException
 
@@ -131,6 +131,40 @@ class TechnologiesMovingAndBackstageAPIView(APIView):
         except DataBaseException:
             return Response(data="Unknown database error. Please, check tables and file models.py",
                             status=500, exception=True)
+
+
+class TechnologiesModelAPIView(APIView):
+
+    def post(self, request, data):
+        """
+        Change model index or frame
+        """
+        if data == 'index':
+            index = request.data['index']
+            TechnologiesModel.set_index(index)
+
+        elif data == 'frame':
+            frame = request.data['frame']
+            TechnologiesModel.set_frame(frame)
+
+        else:
+            return Response(status=400, data='Unknown data, use "index" or "frame"')
+
+        return Response()
+
+    def get(self, request, data):
+        """
+        Get model index or frame
+        """
+        if data == 'index':
+            index = TechnologiesModel.get_index()
+            return Response({'index': index})
+
+        elif data == 'frame':
+            frame = TechnologiesModel.get_frame()
+            return Response({'frame': frame})
+
+        return Response(status=400, data='Unknown data, use "index" or "frame"')
 
 
 class TechnologiesLaurentAPIView(APIView):
