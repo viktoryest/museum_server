@@ -47,7 +47,7 @@ class TimeLineVideoAPIView(APIView):
 
     def get(self, request, year: [int, str], video_index: int) -> Response:
         # handles get-requests from the second app, returns video path, intro video path and their durations:
-        # you should specify one of the following years: 1936, 1953, 1961, 1970, 1980s, 1990s, 2000s, 2010s and
+        # you should specify one of the following years: 1936, 1953, 1961, 1970, 1980s, 1990s, 2000s, 2010s, VIP and
         # video index: 1 or 2
         try:
             video = TimeLine.objects.filter(year=year).values \

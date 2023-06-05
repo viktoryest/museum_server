@@ -71,7 +71,7 @@ class TimeLine(models.Model):
 
     @classmethod
     def check_timeline_videos(cls):
-        list_of_years = ['1936', '1953', '1961', '1970', '1974', '1979', '1980s', '1990s', '2000s', '2010s']
+        list_of_years = ['1936', '1953', '1961', '1970', '1974', '1979', '1980s', '1990s', '2000s', '2010s', 'VIP']
         for year in list_of_years:
             if not cls.objects.filter(year=year):
                 cls.objects.create(year=year)
