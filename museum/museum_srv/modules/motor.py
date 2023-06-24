@@ -8,7 +8,7 @@ from datetime import datetime
 
 from museum_srv.modules.network import network_get
 
-motor_url = 'http://scada.privolga.keenetic.pro/motor'
+motor_url = 'http://192.168.1.136:1880/motor'
 
 handle_technology_action: Callable or None = None
 
@@ -52,10 +52,8 @@ def listen_technology():
         try:
             state_binary = network_get(motor_url + '?X')
             state_string = state_binary.decode('utf-8')
-            state_object_from_json = MotorData.from_json(state_string)
-            print(f'[{current_time}] Technology state: {state_string}')
-            print(f'[{current_time}] Technology state: {state_object_from_json}')
-            print(f'[{current_time}] Technology state: {state_object_from_json.pos}')
+            motor_data = MotorData.from_json(state_string)
+            handle_technology(motor_data)
         except requests.exceptions.ConnectionError:
             print(f'[{current_time}] Error while getting technology - timeout')
             time.sleep(3)
