@@ -59,7 +59,7 @@ def listen_technology():
             time.sleep(3)
         except Exception as e:
             print(f'[{current_time}] UNKNOWN Error while getting technology: {e}')
-            time.sleep(10)
+            time.sleep(.3)
         time.sleep(5)
 
 
