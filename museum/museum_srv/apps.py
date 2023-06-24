@@ -1,7 +1,8 @@
 from django.apps import AppConfig
 from django.db.models.signals import post_migrate
 
-from museum_srv.modules.laurent import listen_flows, listen_technology
+from museum_srv.modules.laurent import listen_flows
+from museum_srv.modules.motor import listen_technology
 
 
 def create_default_tables(sender, **kwargs):

@@ -33,6 +33,7 @@ class TechnologiesStageAPIView(APIView):
         try:
             count_of_records = TechnologiesCurrentStage.objects.count()
             stage = request.data['stage']
+            move = request.data['move']
 
             if count_of_records == 0:
                 TechnologiesCurrentStage.objects.create(stage=stage)
@@ -44,8 +45,9 @@ class TechnologiesStageAPIView(APIView):
             cache.set(self.stage_key, stage)
 
             # preparing for the stage
-            point = TechnologiesLaurent.point_from_stage(stage)
-            TechnologiesLaurent.move_to_point(point, True)
+            if move:
+                point = TechnologiesLaurent.point_from_stage(stage)
+                TechnologiesLaurent.move_to_point(point, True)
 
             return Response()
         except DataBaseException:

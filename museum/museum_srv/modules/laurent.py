@@ -2,26 +2,19 @@ from typing import Callable
 
 import requests
 import time
-from requests.adapters import HTTPAdapter
-from urllib3.util.retry import Retry
 
 from exceptions import LaurentException
 from datetime import datetime
+
+from museum_srv.modules.network import network_get
 
 flows_address = 'http://192.168.1.3'
 technology_address = 'http://192.168.1.5'
 
 
 def get_laurent(address: str, command: str):
-    session = requests.Session()
-    retry = Retry(connect=3, backoff_factor=0.5)
-    adapter = HTTPAdapter(max_retries=retry)
-    session.mount('http://', adapter)
-    session.mount('https://', adapter)
     url = get_url(address, command)
-    laurent_request = requests.get(url, timeout=2)
-    laurent_response = laurent_request.content
-    return laurent_response
+    return network_get(url)
 
 
 def get_url(address: str, command: str):
@@ -71,73 +64,3 @@ def handle_flows(response: str):
 
 def listen_flows():
     listen(flows_address, 'RID,ALL', handle_flows, 'flows mask')
-
-
-handle_technology_action: Callable or None = None
-
-
-def set_handle_technology_action(action: Callable):
-    # Need to set this instead of calling model method directly because of circular imports
-    global handle_technology_action
-    handle_technology_action = action
-
-
-def handle_technology(response):
-    """
-    :param response: string like this: #RD,110010
-    """
-
-    # remove first '#RD,' and last '/r/n'
-    laurent_mask = response[4:10].decode('utf-8')
-    # create dictionary
-    stages_dict = {
-        'past': laurent_mask[0] == '0',
-        'present_1': laurent_mask[2] == '1',
-        'present_2': laurent_mask[3] == '1',
-        'present_3': laurent_mask[4] == '1',
-        'future': laurent_mask[5] == '0',
-    }
-
-    stage = None
-
-    # only one can be true
-    if sum(stages_dict.values()) > 1:
-        current_time = datetime.now().strftime("%H:%M:%S.%f'")
-        raise Exception(f'[{current_time}] More than one stage is active: {stages_dict}')
-    if sum(stages_dict.values()) == 1:
-        # get first true value
-        stage = list(stages_dict.keys())[list(stages_dict.values()).index(True)]
-
-    global handle_technology_action
-    if callable(handle_technology_action):
-        handle_technology_action(stage)
-
-
-def listen_technology():
-    listen(technology_address, 'RD,ALL', handle_technology, 'technology stage', .3)
-
-
-def change_technology_move(state: str):
-    """
-    :param state: string like this: 'left', 'right', 'stop'
-    """
-    command = "REL,ALL,xx"
-    if state == 'left':
-        command = command + '10'
-    elif state == 'right':
-        command = command + '01'
-    elif state == 'stop':
-        command = command + '00'
-    else:
-        raise Exception(f'Unknown state: {state}, should be "left", "right" or "stop"')
-
-    current_time = datetime.now().strftime("%H:%M:%S.%f'")
-    try:
-        resp = get_laurent(technology_address, command)
-        print(f'[{current_time}] Technology move sent to laurent: {command} -> {resp}')
-    except LaurentException:
-        print(f'[{current_time}] Error sending technology move to laurent')
-    except requests.exceptions.ConnectionError:
-        print(f'[{current_time}] Error sending technology move to laurent - timeout')
-    except Exception as e:
-        print(f'[{current_time}] UNKNOWN Error sending technology move to laurent: {e}')

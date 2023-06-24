@@ -4,8 +4,9 @@ from django.db.models.fields.files import FieldFile
 from moviepy.editor import VideoFileClip
 from museum.settings import BASE_DIR
 from django.core.validators import FileExtensionValidator
-from museum_srv.modules.laurent import change_technology_move, set_handle_technology_action
 import os
+
+from museum_srv.modules.motor import set_handle_technology_action, change_technology_move
 
 
 class Technologies(models.Model):
