@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models.fields.files import FieldFile
@@ -178,13 +180,14 @@ class TechnologiesLaurent:
         """ Set the point we are currently in
         :param point: point we are currently in
         """
+        current_time = datetime.now().strftime("%H:%M:%S.%f'")
         if (point is not None) and (point not in cls.points):
-            raise ValueError(f'Unknown point: {cls.target_point}. Available points: {cls.points}')
+            raise ValueError(f'{current_time} Unknown point: {cls.target_point}. Available points: {cls.points}')
 
         if cls.current_point == point:
             return
 
-        print(f'Changing current point {cls.current_point} -> {point}')
+        print(f'{current_time} Changing current point {cls.current_point} -> {point}')
 
         cls.last_point = cls.current_point
         cls.current_point = point
