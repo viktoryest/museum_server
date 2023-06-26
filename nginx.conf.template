@@ -10,6 +10,8 @@ http {
     sendfile on;
     keepalive_timeout 65;
 
+    client_max_body_size 2G;
+
     server {
         listen 8000;
         server_name localhost;
