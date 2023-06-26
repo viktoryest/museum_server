@@ -176,6 +176,14 @@ class TechnologiesLaurent:
         cls.handle_move()
 
     @classmethod
+    def stop(cls):
+        """ Stop the screen """
+        cls.target_point = None
+        cls.target_changed = True
+
+        cls.handle_move()
+
+    @classmethod
     def change_current_point(cls, point: str):
         """ Set the point we are currently in
         :param point: point we are currently in

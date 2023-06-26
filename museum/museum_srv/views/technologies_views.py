@@ -177,5 +177,8 @@ class TechnologiesLaurentAPIView(APIView):
         Available points: past, present_1, present_2, present_3, future
         """
         point = request.data['point']
-        TechnologiesLaurent.move_to_point(point)
+        if point not in ['past', 'present_1', 'present_2', 'present_3', 'future']:
+            TechnologiesLaurent.stop()
+        else:
+            TechnologiesLaurent.move_to_point(point)
         return Response()
