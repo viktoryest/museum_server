@@ -28,7 +28,7 @@ class IdleAPIView(APIView):
             try:
                 video = Idle.objects.filter(app=app).values('video', 'video_duration').first()
                 video_path = video['video']
-                final_path = f'/media/{video_path}'
+                final_path = f'/{video_path}'
 
                 duration = video[f'video_duration']
 

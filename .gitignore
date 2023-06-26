@@ -137,3 +137,4 @@ museum/media/
 #Django cache files
 museum/museum_cache/
 /museum/.idea/
+/nginx.conf

@@ -50,7 +50,7 @@ class AreaSamaraVideoAPIView(APIView):
         try:
             video = AreaSamara.objects.filter(stage=f'stage_{stage}').values('video', 'video_duration').first()
             video_path = video['video']
-            final_path = f'/media/{video_path}'
+            final_path = f'/{video_path}'
 
             duration = video['video_duration']
 

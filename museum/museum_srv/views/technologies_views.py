@@ -65,7 +65,7 @@ class TechnologiesFourthAPIView(APIView):
             fourth_video = TechnologiesFourth.objects \
                 .filter(label=label).values('fourth_stage_video', 'fourth_stage_video_duration').first()
             fourth_video_path = fourth_video['fourth_stage_video']
-            final_path = f'/media/{fourth_video_path}'
+            final_path = f'/{fourth_video_path}'
 
             duration = fourth_video['fourth_stage_video_duration']
 
@@ -124,7 +124,7 @@ class TechnologiesMovingAndBackstageAPIView(APIView):
             video = Technologies.objects \
                 .filter(stage=stage).values(f'{video_type}_video', f'{video_type}_video_duration').first()
             video_path = video[f'{video_type}_video']
-            final_path = f'/media/{video_path}'
+            final_path = f'/{video_path}'
 
             duration = video[f'{video_type}_video_duration']
 

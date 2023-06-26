@@ -55,11 +55,11 @@ class TimeLineVideoAPIView(APIView):
                  f'intro_video_{video_index}', f'intro_video_{video_index}_duration').first()
 
             video_path = video[f'video_{video_index}']
-            final_path = f'/media/{video_path}'
+            final_path = f'/{video_path}'
             duration = video[f'video_{video_index}_duration']
 
             intro_video_path = video[f'intro_video_{video_index}']
-            final_intro_path = f'/media/{intro_video_path}'
+            final_intro_path = f'/{intro_video_path}'
             intro_duration = video[f'intro_video_{video_index}_duration']
 
             return Response({"current_video": f"{final_path}",
