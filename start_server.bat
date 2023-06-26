@@ -11,4 +11,4 @@ start %nginxpath% -c %CD%\nginx.conf -p %nginxdir%
 cd museum && ^
 pip install -r requirements.txt && ^
 python manage.py migrate && ^
-start cmd /k python manage.py runserver 0.0.0.0:9000
+start cmd /k python manage.py runserver 0.0.0.0:9000 --noreload
