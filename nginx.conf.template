@@ -23,6 +23,13 @@ http {
             autoindex on;
         }
 
+        location /media/static/ {
+            alias CONFIG_PATH/museum/media/static/;
+            expires 24h;
+            index index.html; 
+            autoindex on;
+        }
+
         location / {
             proxy_pass http://localhost:9000;
             proxy_set_header Host $host;
