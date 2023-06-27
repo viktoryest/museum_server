@@ -178,7 +178,7 @@ class TechnologiesLaurent:
     @classmethod
     def stop(cls):
         """ Stop the screen """
-        cls.target_point = None
+        cls.target_point = cls.current_point
         cls.target_changed = True
 
         cls.handle_move()
